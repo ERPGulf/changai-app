@@ -5,57 +5,109 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Welcome() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to ChangAI 🤖</Text>
+    <>
+      <StatusBar barStyle="light-content" />
 
-      <Text style={styles.subtitle}>
-        Your intelligent AI assistant
-      </Text>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/Login")}
+      <LinearGradient
+        colors={["#0F172A", "#1E293B", "#2563EB"]}
+        style={styles.container}
       >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
-    </View>
+        {/* AI Icon */}
+        <View style={styles.iconContainer}>
+          <MaterialCommunityIcons
+            name="robot-excited-outline"
+            size={90}
+            color="#fff"
+          />
+        </View>
+
+        {/* Title */}
+        <Text style={styles.title}>ChangAI</Text>
+
+        {/* Subtitle */}
+        <Text style={styles.subtitle}>
+          Your intelligent AI assistant for smarter conversations,
+          productivity, and instant answers.
+        </Text>
+
+        {/* Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/Login")}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
+        </TouchableOpacity>
+
+        {/* Footer */}
+        <Text style={styles.footer}>
+          Powered by AI
+        </Text>
+      </LinearGradient>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
+
+  iconContainer: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0F172A",
-    paddingHorizontal: 24,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 32,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#CBD5E1",
-    marginTop: 10,
-    fontSize: 16,
-    textAlign: "center",
     marginBottom: 30,
   },
-  button: {
-    backgroundColor: "#3B82F6",
-    paddingHorizontal: 30,
-    paddingVertical: 14,
-    borderRadius: 12,
+
+  title: {
+    fontSize: 42,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    letterSpacing: 1,
   },
+
+  subtitle: {
+    marginTop: 16,
+    fontSize: 17,
+    color: "#E2E8F0",
+    textAlign: "center",
+    lineHeight: 26,
+    maxWidth: 320,
+    marginBottom: 50,
+  },
+
+  button: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 16,
+    paddingHorizontal: 50,
+    borderRadius: 16,
+    elevation: 5,
+  },
+
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: "#2563EB",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+
+  footer: {
+    position: "absolute",
+    bottom: 40,
+    color: "#CBD5E1",
+    fontSize: 14,
   },
 });
