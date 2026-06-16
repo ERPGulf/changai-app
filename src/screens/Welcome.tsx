@@ -22,7 +22,7 @@ export default function Welcome() {
         {/* AI Icon */}
         <View style={styles.iconContainer}>
           <MaterialCommunityIcons
-            name="robot-excited-outline"
+            name="chat-processing-outline"
             size={90}
             color="#fff"
           />
@@ -40,7 +40,7 @@ export default function Welcome() {
         {/* Button */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/Login")}
+          onPress={() => router.push("/QrScan")}
           activeOpacity={0.8}
         >
           <Text style={styles.buttonText}>Get Started</Text>

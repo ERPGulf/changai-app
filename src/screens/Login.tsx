@@ -7,20 +7,35 @@ import {
   StyleSheet,
   SafeAreaView,
 } from "react-native";
-
+import { generateToken } from "../services/auth";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    console.log("Login", { email, password });
-    // Call API here
+  const handleLogin = async () => {
+    try {
+      const tokenData = await generateToken({
+        api_key: "Administrator",
+        app_key: "Q2hhbmdBSQ==",
+        api_secret: password,
+        baseUrl: "https://hyrin.erpgulf.com:7061",
+      });
+
+      console.log("Access Token:", tokenData.access_token);
+
+      // Navigate to next screen
+    } catch (error: any) {
+      console.log(
+        "Login failed",
+        error.response?.data || error.message
+      );
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.logo}>🤖</Text>
+        <Text style={styles.logo}>🔮</Text>
 
         <Text style={styles.title}>Welcome Back</Text>
 
