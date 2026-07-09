@@ -6,15 +6,17 @@ import {
     TouchableOpacity,
     FlatList,
     Dimensions,
+    Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 const finishOnboarding = async () => {
     try {
-        await AsyncStorage.setItem("onboardingCompleted", "true");
+        // await AsyncStorage.setItem("onboardingCompleted", "true");
         router.replace("/Welcome");
     } catch (error) {
         console.log("Error saving onboarding status:", error);
@@ -23,7 +25,7 @@ const finishOnboarding = async () => {
 const slides = [
     {
         id: "1",
-        icon: "briefcase-outline",
+        icon: "null",
         iconColor: "#8B5CF6",
         glow: "rgba(139,92,246,0.15)",
         title: "Meet changAI",
@@ -53,7 +55,7 @@ const slides = [
 export default function Onboarding() {
     const flatListRef = useRef<FlatList>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
-
+    const insets = useSafeAreaInsets();
     const handleNext = async () => {
         if (currentIndex < slides.length - 1) {
             flatListRef.current?.scrollToIndex({
@@ -66,93 +68,112 @@ export default function Onboarding() {
     };
 
     return (
-        <LinearGradient
-            colors={["#090D16", "#080C14", "#05070D"]}
-            style={styles.container}
-        >
-            <TouchableOpacity
-                style={styles.skip}
-                onPress={finishOnboarding}
+        <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+            <LinearGradient
+                colors={["#090B14", "#070A12", "#05060D"]}
+                style={styles.container}
             >
-                <Text style={styles.skipText}>Skip</Text>
-            </TouchableOpacity>
 
-            <FlatList
-                ref={flatListRef}
-                data={slides}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                onMomentumScrollEnd={(e) => {
-                    const index = Math.round(
-                        e.nativeEvent.contentOffset.x / width
-                    );
-                    setCurrentIndex(index);
-                }}
-                renderItem={({ item }) => (
-                    <View style={styles.slide}>
-                        <View style={styles.glowContainer}>
-                            <View
-                                style={[
-                                    styles.iconOuter,
-                                    { backgroundColor: item.glow },
-                                ]}
-                            >
-                                <View
-                                    style={[
-                                        styles.iconInner,
-                                        {
-                                            borderColor: item.iconColor,
-                                            backgroundColor: item.glow,
-                                        },
-                                    ]}
-                                >
-                                    <Ionicons
-                                        name={item.icon as any}
-                                        size={20}
-                                        color={item.iconColor}
-                                    />
+                <TouchableOpacity
+                    style={styles.skip}
+                    onPress={finishOnboarding}
+                >
+                    <Text style={styles.skipText}>Skip</Text>
+                </TouchableOpacity>
+
+                <FlatList
+
+                    ref={flatListRef}
+                    style={{ flex: 1 }}
+                    data={slides}
+                    horizontal
+                    pagingEnabled
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(item) => item.id}
+                    onMomentumScrollEnd={(e) => {
+                        const index = Math.round(
+                            e.nativeEvent.contentOffset.x / width
+                        );
+                        setCurrentIndex(index);
+                    }}
+                    renderItem={({ item }) => (
+                        <View style={styles.slide}>
+                            <View style={styles.glowOuter}>
+                                <View style={styles.glowRing}>
+                                    <View style={styles.iconGlow} />
+                                    <LinearGradient
+                                        colors={[
+                                            "rgba(108,79,248,0.20)",
+                                            "rgba(108,79,248,0.07)",
+                                        ]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 1 }}
+                                        style={styles.iconContainer}
+                                    >
+
+                                        {item.id === "1" ? (
+                                            <Image
+                                                source={require("../../assets/images/Icon.png")}
+                                                style={styles.robotIcon}
+                                                resizeMode="contain"
+                                            />
+                                        ) : (
+                                            <Ionicons
+                                                name={item.icon as any}
+                                                size={36}
+                                                color={item.iconColor}
+                                            />
+                                        )}
+                                    </LinearGradient>
+
                                 </View>
                             </View>
+
+                            <Text style={styles.title}>{item.title}</Text>
+
+                            <Text style={styles.description}>
+                                {item.description}
+                            </Text>
                         </View>
+                    )}
+                />
 
-                        <Text style={styles.title}>{item.title}</Text>
-
-                        <Text style={styles.description}>
-                            {item.description}
-                        </Text>
+                <View
+                    style={[
+                        styles.footer,
+                        {
+                            paddingBottom: insets.bottom + 16,
+                        },
+                    ]}
+                >
+                    <View style={styles.dots}>
+                        {slides.map((_, index) => (
+                            <View
+                                key={index}
+                                style={[
+                                    styles.dot,
+                                    currentIndex === index && styles.activeDot,
+                                ]}
+                            />
+                        ))}
                     </View>
-                )}
-            />
 
-            <View style={styles.footer}>
-                <View style={styles.dots}>
-                    {slides.map((_, index) => (
-                        <View
-                            key={index}
-                            style={[
-                                styles.dot,
-                                currentIndex === index && styles.activeDot,
-                            ]}
-                        />
-                    ))}
+                    <TouchableOpacity onPress={handleNext}>
+                        <LinearGradient
+                            colors={["#8B5CF6", "#6D28D9"]}
+                            style={styles.button}
+                        >
+                            <Text style={styles.buttonText}>
+                                {currentIndex === slides.length - 1
+                                    ? "Get Started →"
+                                    : "Continue →"}
+                            </Text>
+                        </LinearGradient>
+
+                    </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity onPress={handleNext}>
-                    <LinearGradient
-                        colors={["#7C3AED", "#6D28D9"]}
-                        style={styles.button}
-                    >
-                        <Text style={styles.buttonText}>
-                            {currentIndex === slides.length - 1
-                                ? "Get Started →"
-                                : "Continue →"}
-                        </Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        </LinearGradient>
+            </LinearGradient>
+        </SafeAreaView>
     );
 }
 
@@ -163,14 +184,23 @@ const styles = StyleSheet.create({
 
     skip: {
         position: "absolute",
-        top: 60,
+        top: 58,
         right: 24,
-        zIndex: 10,
+
+        width: 60,
+        height: 34,
+
+        borderRadius: 17,
+
         borderWidth: 1,
-        borderColor: "#2E3445",
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        borderColor: "rgba(255,255,255,.10)",
+
+        backgroundColor: "rgba(255,255,255,.03)",
+
+        justifyContent: "center",
+        alignItems: "center",
+
+        zIndex: 10,
     },
 
     skipText: {
@@ -179,56 +209,67 @@ const styles = StyleSheet.create({
 
     slide: {
         width,
-        justifyContent: "center",
-        alignItems: "center",
+        height: 570,
         paddingHorizontal: 32,
-    },
+        paddingBottom: 16,
 
-    glowContainer: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(255,255,255,0.05)",
-        marginBottom: 40,
     },
 
-    iconOuter: {
+    glowOuter: {
+        width: 132,
+        height: 132,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    glowRing: {
+        width: 108,
+        height: 108,
+        borderRadius: 54,
+        borderWidth: 1,
+        borderColor: "rgba(108,79,248,0.08)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    robotIcon: {
+        width: 36,
+        height: 36,
+        resizeMode: "contain",
+    },
+    iconContainer: {
         width: 80,
         height: 80,
-        borderRadius: 40,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    iconInner: {
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        borderWidth: 0.8,
-        justifyContent: "center",
-        alignItems: "center",
-    },
+        borderRadius: 24,
 
+        borderWidth: 0.8,
+        borderColor: "rgba(108,79,248,0.25)",
+
+        justifyContent: "center",
+        alignItems: "center",
+    },
     title: {
-        color: "#FFF",
-        fontSize: 30,
+        marginTop: 28,
+        fontSize: 18,
         fontWeight: "700",
-        marginBottom: 14,
+        color: "#FFF",
+    },
+    iconGlow: {
+        position: "absolute",
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: "rgba(108,79,248,0.10)",
     },
 
     description: {
-        color: "#8B93A8",
-        fontSize: 15,
-        lineHeight: 24,
+        width: 240,
+        marginTop: 10,
+        fontSize: 11,
+        lineHeight: 18,
+        color: "rgba(255,255,255,.45)",
         textAlign: "center",
-    },
-
-    footer: {
-        position: "absolute",
-        bottom: 45,
-        width: "100%",
-        paddingHorizontal: 24,
     },
 
     dots: {
@@ -238,27 +279,46 @@ const styles = StyleSheet.create({
     },
 
     dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: "#444",
+        width: 4,
+        height: 4,
+        borderRadius: 2,
         marginHorizontal: 4,
+        backgroundColor: "rgba(255,255,255,.20)",
     },
 
     activeDot: {
-        width: 24,
+        width: 14,
+        borderRadius: 2,
         backgroundColor: "#7C3AED",
     },
 
     button: {
-        borderRadius: 16,
+        height: 60,
+        borderRadius: 14,
+        justifyContent: "center",
         alignItems: "center",
-        paddingVertical: 18,
+
+        shadowColor: "#7C3AED",
+        shadowOpacity: 0.45,
+        shadowRadius: 20,
+        shadowOffset: {
+            width: 0,
+            height: 10,
+        },
+        elevation: 15,
     },
 
     buttonText: {
         color: "#FFF",
         fontSize: 16,
         fontWeight: "600",
+    },
+    footer: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        paddingHorizontal: 28,
     },
 });

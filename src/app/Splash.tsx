@@ -33,13 +33,14 @@ export default function Splash() {
           "onboardingCompleted"
         );
 
-        setTimeout(() => {
-          if (onboardingCompleted === "true") {
-            router.replace("/Welcome");
-          } else {
-            router.replace("/Onboarding");
-          }
-        }, 2500);
+        // setTimeout(() => {
+        //   if (onboardingCompleted === "true") {
+        //     router.replace("/Welcome");
+        //   } else {
+        //     router.replace("/Onboarding");
+        //   }
+        // }, 2500);
+        router.replace("/Onboarding");
       } catch (error) {
         console.log(error);
 
@@ -81,7 +82,7 @@ export default function Splash() {
 
         <View style={styles.logoContainer}>
           <Image
-            source={require("../assets/images/logo.png")}
+            source={require("../../assets/images/Icon.png")}
             style={styles.logo}
           />
         </View>
