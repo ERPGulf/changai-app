@@ -17,16 +17,15 @@ export default function Splash() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 800,
+        duration: 900,
         useNativeDriver: true,
       }),
-      Animated.spring(scaleAnim, {
+      Animated.timing(scaleAnim, {
         toValue: 1,
-        friction: 6,
+        duration: 900,
         useNativeDriver: true,
       }),
     ]).start();
-
     const checkAppState = async () => {
       try {
         const onboardingCompleted = await AsyncStorage.getItem(
@@ -55,7 +54,13 @@ export default function Splash() {
 
   return (
     <LinearGradient
-      colors={["#090D16", "#080C14", "#05070D"]}
+      colors={[
+        "#140C2D",
+        "#0B0E1B",
+        "#071018",
+        "#050A12",
+      ]}
+      locations={[0, 0.28, 0.65, 1]}
       style={styles.container}
     >
       {/* Purple Glow */}
@@ -108,43 +113,45 @@ const styles = StyleSheet.create({
   },
   ring1: {
     position: "absolute",
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 148,
+    height: 148,
+    borderRadius: 74,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.04)",
   },
 
   ring2: {
     position: "absolute",
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 208,
+    height: 208,
+    borderRadius: 104,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.03)",
   },
 
   ring3: {
     position: "absolute",
-    width: 290,
-    height: 290,
-    borderRadius: 145,
+    width: 268,
+    height: 268,
+    borderRadius: 134,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.02)",
   },
 
   ring4: {
     position: "absolute",
-    width: 360,
-    height: 360,
-    borderRadius: 180,
+    width: 330,
+    height: 330,
+    borderRadius: 165,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.015)",
   },
   centerContainer: {
+    position: "absolute",
+    top: "47%",
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+    transform: [{ translateY: -120 }],
   },
   glowLarge: {
     position: "absolute",
@@ -162,87 +169,74 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(108,79,248,0.22)",
   },
 
-
   logoContainer: {
     width: 96,
     height: 96,
     borderRadius: 32,
+
     justifyContent: "center",
     alignItems: "center",
 
     backgroundColor: "#0A0614",
+
     borderWidth: 1.6,
     borderColor: "rgba(108,79,248,0.55)",
 
     shadowColor: "#6C4FF8",
+    shadowOpacity: 0.45,
     shadowRadius: 30,
-    shadowOpacity: 0.8,
     shadowOffset: {
       width: 0,
       height: 0,
     },
 
-    elevation: 20,
+    elevation: 14,
   },
-  logoCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#111827",
 
-    shadowColor: "#8B5CF6",
-    shadowOpacity: 0.8,
-    shadowRadius: 25,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-
-    elevation: 15,
-    borderWidth: 1,
-    borderColor: "#5B3CC4",
-  },
 
   logo: {
-    width: 44,
-    height: 44,
+    width: 38,
+    height: 38,
   },
 
   title: {
-    marginTop: 28,
-    color: "#FFF",
-    fontSize: 36,
+    marginTop: 20,
+    fontSize: 28,
     fontWeight: "700",
-    lineHeight: 40,
-    letterSpacing: -0.9,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
   },
+  // subtitle: {
+  //   marginTop: 6,
+  //   color: "rgba(255,255,255,0.5)",
+  //   fontSize: 14,
+  //   fontWeight: "400",
+  //   lineHeight: 20,
+  //   letterSpacing: 1.4,Animated.spring(...)
+  //   textTransform: "uppercase",
 
+  // },
   subtitle: {
-    marginTop: 6,
-    color: "rgba(255,255,255,0.5)",
-    fontSize: 14,
-    fontWeight: "400",
-    lineHeight: 20,
-    letterSpacing: 1.4,
-    textTransform: "uppercase",
-
+    marginTop: 2,
+    fontSize: 10,
+    letterSpacing: 2.2,
+    color: "rgba(255,255,255,.42)",
   },
 
   footer: {
     position: "absolute",
-    bottom: 55,
+    bottom: 36,
     alignItems: "center",
   },
 
   powered: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.25)"
+    fontSize: 9,
+    color: "rgba(255,255,255,.25)",
   },
 
   company: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.45)"
-  }
+    marginTop: 2,
+    fontSize: 10,
+    color: "rgba(255,255,255,.40)",
+  },
 });
