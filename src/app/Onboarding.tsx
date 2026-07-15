@@ -14,13 +14,17 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
+// const finishOnboarding = async () => {
+//     try {
+//         await AsyncStorage.setItem("onboardingCompleted", "true");
+//         router.replace("/Welcome");
+//     } catch (error) {
+//         console.log("Error saving onboarding status:", error);
+//     }
+// };
 const finishOnboarding = async () => {
-    try {
-        // await AsyncStorage.setItem("onboardingCompleted", "true");
-        router.replace("/Welcome");
-    } catch (error) {
-        console.log("Error saving onboarding status:", error);
-    }
+    console.log("Onboarding completed");
+    // Temporarily disable navigation while designing.
 };
 const slides = [
     {
@@ -209,12 +213,11 @@ const styles = StyleSheet.create({
 
     slide: {
         width,
-        height: 570,
+        flex: 1,
         paddingHorizontal: 32,
-        paddingBottom: 16,
-
         justifyContent: "center",
         alignItems: "center",
+
     },
 
     glowOuter: {
@@ -233,11 +236,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    robotIcon: {
-        width: 36,
-        height: 36,
-        resizeMode: "contain",
-    },
+
     iconContainer: {
         width: 80,
         height: 80,
@@ -249,12 +248,22 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    title: {
-        marginTop: 28,
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#FFF",
+
+    robotIcon: {
+        width: 42,
+        height: 42,
     },
+
+    title: {
+        marginTop: 32,
+        color: "#EEF2FF",
+        textAlign: "center",
+        fontSize: 30,
+        fontFamily: "Outfit_700Bold",
+        fontWeight: "700",
+        lineHeight: 36,
+    },
+
     iconGlow: {
         position: "absolute",
         width: 70,
@@ -264,12 +273,15 @@ const styles = StyleSheet.create({
     },
 
     description: {
-        width: 240,
-        marginTop: 10,
-        fontSize: 11,
-        lineHeight: 18,
-        color: "rgba(255,255,255,.45)",
+        width: 290,          // adjust if needed (280–300)
+        marginTop: 12,
+        color: "#7A8FAF",
         textAlign: "center",
+
+        fontFamily: "Inter_400Regular",
+        fontSize: 14,
+        fontWeight: "400",
+        lineHeight: 23,
     },
 
     dots: {

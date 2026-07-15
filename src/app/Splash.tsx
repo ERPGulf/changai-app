@@ -26,27 +26,33 @@ export default function Splash() {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // const checkAppState = async () => {
+    //   try {
+    //     const onboardingCompleted = await AsyncStorage.getItem(
+    //       "onboardingCompleted"
+    //     );
+
+    //     setTimeout(() => {
+    //       if (onboardingCompleted === "true") {
+    //         router.replace("/Welcome");
+    //       } else {
+    //         router.replace("/Onboarding");
+    //       }
+    //     }, 2500);
+    //     router.replace("/Onboarding");
+    //   } catch (error) {
+    //     console.log(error);
+
+    //     setTimeout(() => {
+    //       router.replace("/Onboarding");
+    //     }, 2500);
+    //   }
+    // };
     const checkAppState = async () => {
-      try {
-        const onboardingCompleted = await AsyncStorage.getItem(
-          "onboardingCompleted"
-        );
-
-        // setTimeout(() => {
-        //   if (onboardingCompleted === "true") {
-        //     router.replace("/Welcome");
-        //   } else {
-        //     router.replace("/Onboarding");
-        //   }
-        // }, 2500);
+      setTimeout(() => {
         router.replace("/Onboarding");
-      } catch (error) {
-        console.log(error);
-
-        setTimeout(() => {
-          router.replace("/Onboarding");
-        }, 2500);
-      }
+      }, 5000); // 5 seconds
     };
 
     checkAppState();
@@ -64,26 +70,23 @@ export default function Splash() {
       style={styles.container}
     >
       {/* Purple Glow */}
-      <View style={styles.glowLarge} />
-      <View style={styles.glowSmall} />
-
       <Animated.View
         style={[
           styles.centerContainer,
           {
             opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }]
-          }
+            transform: [{ scale: scaleAnim }],
+          },
         ]}
       >
 
         <View style={styles.glowLarge} />
+        <View style={styles.glowMedium} />
         <View style={styles.glowSmall} />
-
-        <View style={styles.ring4} />
+        {/* <View style={styles.ring4} />
         <View style={styles.ring3} />
         <View style={styles.ring2} />
-        <View style={styles.ring1} />
+        <View style={styles.ring1} /> */}
 
         <View style={styles.logoContainer}>
           <Image
@@ -111,124 +114,128 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  ring1: {
-    position: "absolute",
-    width: 148,
-    height: 148,
-    borderRadius: 74,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
-  },
+  // ring4: {
+  //   position: "absolute",
+  //   width: 320,
+  //   height: 320,
+  //   borderRadius: 160,
 
-  ring2: {
-    position: "absolute",
-    width: 208,
-    height: 208,
-    borderRadius: 104,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.03)",
-  },
+  //   borderWidth: .8,
+  //   borderColor: "rgba(255,255,255,.05)",
+  // },
 
-  ring3: {
-    position: "absolute",
-    width: 268,
-    height: 268,
-    borderRadius: 134,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.02)",
-  },
+  // ring3: {
+  //   position: "absolute",
+  //   width: 260,
+  //   height: 260,
+  //   borderRadius: 130,
 
-  ring4: {
-    position: "absolute",
-    width: 330,
-    height: 330,
-    borderRadius: 165,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.015)",
-  },
+  //   borderWidth: .8,
+  //   borderColor: "rgba(255,255,255,.04)",
+  // },
+
+  // ring2: {
+  //   position: "absolute",
+  //   width: 200,
+  //   height: 200,
+  //   borderRadius: 100,
+
+  //   borderWidth: .8,
+  //   borderColor: "rgba(255,255,255,.03)",
+  // },
+
+  // ring1: {
+  //   position: "absolute",
+  //   width: 140,
+  //   height: 140,
+  //   borderRadius: 70,
+
+  //   borderWidth: .8,
+  //   borderColor: "rgba(255,255,255,.02)",
+  // },
+
   centerContainer: {
     position: "absolute",
-    top: "47%",
+    top: "39%",
+    left: 0,
+    right: 0,
     alignItems: "center",
     justifyContent: "center",
-    transform: [{ translateY: -120 }],
   },
+
+
   glowLarge: {
     position: "absolute",
     width: 320,
     height: 320,
     borderRadius: 160,
-    backgroundColor: "rgba(108,79,248,0.12)",
+    backgroundColor: "rgba(108,79,248,0.035)",
   },
-
+  glowMedium: {
+    position: "absolute",
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: "rgba(108,79,248,0.055)",
+  },
   glowSmall: {
     position: "absolute",
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "rgba(108,79,248,0.22)",
+    backgroundColor: "rgba(108,79,248,0.08)",
   },
-
   logoContainer: {
     width: 96,
     height: 96,
     borderRadius: 32,
 
-    justifyContent: "center",
-    alignItems: "center",
-
-    backgroundColor: "#0A0614",
+    backgroundColor: "#090613",
 
     borderWidth: 1.6,
     borderColor: "rgba(108,79,248,0.55)",
 
+    justifyContent: "center",
+    alignItems: "center",
+
     shadowColor: "#6C4FF8",
-    shadowOpacity: 0.45,
-    shadowRadius: 30,
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
     shadowOffset: {
       width: 0,
       height: 0,
     },
 
-    elevation: 14,
+    elevation: 10,
   },
-
 
   logo: {
     width: 38,
     height: 38,
+    resizeMode: "contain",
   },
 
   title: {
-    marginTop: 20,
-    fontSize: 28,
+    marginTop: 18,
+    fontSize: 26,
     fontWeight: "700",
-    color: "#FFFFFF",
-    letterSpacing: -0.5,
+    color: "#FFF",
   },
-  // subtitle: {
-  //   marginTop: 6,
-  //   color: "rgba(255,255,255,0.5)",
-  //   fontSize: 14,
-  //   fontWeight: "400",
-  //   lineHeight: 20,
-  //   letterSpacing: 1.4,Animated.spring(...)
-  //   textTransform: "uppercase",
 
-  // },
   subtitle: {
-    marginTop: 2,
-    fontSize: 10,
-    letterSpacing: 2.2,
-    color: "rgba(255,255,255,.42)",
+    marginTop: 4,
+    fontSize: 9,
+    letterSpacing: 2.4,
+    color: "rgba(255,255,255,0.42)",
   },
 
   footer: {
     position: "absolute",
-    bottom: 36,
+    bottom: 90,
+    left: 0,
+    right: 0,
     alignItems: "center",
   },
-
   powered: {
     fontSize: 9,
     color: "rgba(255,255,255,.25)",

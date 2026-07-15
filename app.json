@@ -4,33 +4,25 @@
     "slug": "changai",
     "version": "1.0.0",
     "orientation": "portrait",
-
     "icon": "./assets/images/Icon.png",
-
     "scheme": "changai",
-
     "userInterfaceStyle": "light",
-
     "assetBundlePatterns": [
       "**/*"
     ],
-
     "splash": {
       "image": "./assets/images/Icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "plugins": [
       "expo-router",
-
       [
         "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for QR code scanning."
         }
       ],
-
       [
         "expo-splash-screen",
         {
@@ -38,61 +30,48 @@
           "image": "./assets/images/Icon.png",
           "imageWidth": 120
         }
-      ]
+      ],
+      "expo-font"
     ],
-
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.erpgulf.changai",
-
       "infoPlist": {
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera for QR code scanning."
       }
     },
-
     "android": {
       "package": "com.erpgulf.changai",
-
       "versionCode": 1,
-
       "softwareKeyboardLayoutMode": "resize",
-
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Icon.png",
-         "backgroundColor": "#080C14"
+        "backgroundColor": "#080C14"
       },
-
       "permissions": [
         "android.permission.CAMERA"
       ],
-
       "predictiveBackGestureEnabled": false
     },
-
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
-
     "extra": {
       "router": {},
       "eas": {
         "projectId": "3a4f79f9-9cde-452d-a57f-ad901263e706"
       }
     },
-
     "runtimeVersion": "1.0.0",
-
     "updates": {
       "enabled": true,
       "checkAutomatically": "ON_LOAD"
     },
-
     "owner": "erpgulf"
   }
 }
