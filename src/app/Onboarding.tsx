@@ -103,36 +103,36 @@ export default function Onboarding() {
                     renderItem={({ item }) => (
                         <View style={styles.slide}>
                             <View style={styles.glowOuter}>
-                                <View style={styles.glowRing}>
-                                    <View style={styles.iconGlow} />
-                                    <LinearGradient
-                                        colors={[
-                                            "rgba(108,79,248,0.20)",
-                                            "rgba(108,79,248,0.07)",
-                                        ]}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 1, y: 1 }}
-                                        style={styles.iconContainer}
-                                    >
 
-                                        {item.id === "1" ? (
-                                            <Image
-                                                source={require("../../assets/images/Icon.png")}
-                                                style={styles.robotIcon}
-                                                resizeMode="contain"
-                                            />
-                                        ) : (
-                                            <Ionicons
-                                                name={item.icon as any}
-                                                size={36}
-                                                color={item.iconColor}
-                                            />
-                                        )}
-                                    </LinearGradient>
+                                <View style={styles.ringLarge} />
+                                <View style={styles.ringMedium} />
+                                <View style={styles.ringSmall} />
 
-                                </View>
+                                <LinearGradient
+                                    colors={[
+                                        `${item.iconColor}33`,
+                                        `${item.iconColor}11`,
+                                    ]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.iconContainer}
+                                >
+                                    {item.id === "1" ? (
+                                        <Image
+                                            source={require("../../assets/images/Icon.png")}
+                                            style={styles.robotIcon}
+                                            resizeMode="contain"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name={item.icon as any}
+                                            size={36}
+                                            color={item.iconColor}
+                                        />
+                                    )}
+                                </LinearGradient>
+
                             </View>
-
                             <Text style={styles.title}>{item.title}</Text>
 
                             <Text style={styles.description}>
@@ -236,7 +236,32 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    ringLarge: {
+        position: "absolute",
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.05)",
+    },
 
+    ringMedium: {
+        position: "absolute",
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.05)",
+    },
+
+    ringSmall: {
+        position: "absolute",
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.05)",
+    },
     iconContainer: {
         width: 80,
         height: 80,
@@ -273,7 +298,7 @@ const styles = StyleSheet.create({
     },
 
     description: {
-        width: 290,          // adjust if needed (280–300)
+        width: 320,
         marginTop: 12,
         color: "#7A8FAF",
         textAlign: "center",
