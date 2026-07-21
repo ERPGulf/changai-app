@@ -8,11 +8,13 @@ import {
     Dimensions,
     Image,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import GradientButton from "../components/common/GradientButton";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import { Animated } from "react-native";
 const { width, height } = Dimensions.get("window");
 // const finishOnboarding = async () => {
 //     try {
@@ -23,9 +25,15 @@ const { width, height } = Dimensions.get("window");
 //     }
 // };
 const finishOnboarding = async () => {
-    console.log("Onboarding completed");
-    // Temporarily disable navigation while designing.
+    try {
+        await AsyncStorage.setItem("onboardingCompleted", "true");
+
+        router.replace("/QrScan"); // Navigate to QR Scan screen
+    } catch (error) {
+        console.log("Error saving onboarding status:", error);
+    }
 };
+
 const slides = [
     {
         id: "1",
@@ -60,15 +68,34 @@ export default function Onboarding() {
     const flatListRef = useRef<FlatList>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
     const insets = useSafeAreaInsets();
+    const fadeAnim = useRef(new Animated.Value(1)).current;
     const handleNext = async () => {
-        if (currentIndex < slides.length - 1) {
-            flatListRef.current?.scrollToIndex({
-                index: currentIndex + 1,
-                animated: true,
-            });
-        } else {
-            await finishOnboarding();
-        }
+
+        Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+        }).start(() => {
+
+            if (currentIndex < slides.length - 1) {
+
+                flatListRef.current?.scrollToIndex({
+                    index: currentIndex + 1,
+                    animated: true,
+                });
+
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 200,
+                    useNativeDriver: true,
+                }).start();
+
+            } else {
+                finishOnboarding();
+            }
+
+        });
+
     };
 
     return (
@@ -101,27 +128,65 @@ export default function Onboarding() {
                         setCurrentIndex(index);
                     }}
                     renderItem={({ item }) => (
-                        <View style={styles.slide}>
+                        <Animated.View style={[styles.slide, { opacity: fadeAnim }]}>
                             <View style={styles.glowOuter}>
 
-                                <View style={styles.ringLarge} />
-                                <View style={styles.ringMedium} />
-                                <View style={styles.ringSmall} />
+                                {/* Glow */}
+                                <View
+                                    style={[
+                                        styles.glowCircle1,
+                                        { backgroundColor: item.iconColor },
+                                    ]}
+                                />
 
+                                <View
+                                    style={[
+                                        styles.glowCircle2,
+                                        { backgroundColor: item.iconColor },
+                                    ]}
+                                />
+
+                                <View
+                                    style={[
+                                        styles.glowCircle3,
+                                        { backgroundColor: item.iconColor },
+                                    ]}
+                                />
+
+                                {/* Rings */}
+                                <View
+                                    style={[
+                                        styles.ringLarge,
+                                        { borderColor: `${item.iconColor}10` },
+                                    ]}
+                                />
+
+                                <View
+                                    style={[
+                                        styles.ringMedium,
+                                        { borderColor: `${item.iconColor}10` },
+                                    ]}
+                                />
+
+                                <View
+                                    style={[
+                                        styles.ringSmall,
+                                        { borderColor: `${item.iconColor}10` },
+                                    ]}
+                                />
+
+                                {/* Icon */}
                                 <LinearGradient
                                     colors={[
-                                        `${item.iconColor}33`,
-                                        `${item.iconColor}11`,
+                                        `${item.iconColor}26`,
+                                        `${item.iconColor}12`,
                                     ]}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
                                     style={styles.iconContainer}
                                 >
                                     {item.id === "1" ? (
                                         <Image
                                             source={require("../../assets/images/Icon.png")}
                                             style={styles.robotIcon}
-                                            resizeMode="contain"
                                         />
                                     ) : (
                                         <Ionicons
@@ -133,12 +198,13 @@ export default function Onboarding() {
                                 </LinearGradient>
 
                             </View>
+
                             <Text style={styles.title}>{item.title}</Text>
 
                             <Text style={styles.description}>
                                 {item.description}
                             </Text>
-                        </View>
+                        </Animated.View>
                     )}
                 />
 
@@ -156,25 +222,26 @@ export default function Onboarding() {
                                 key={index}
                                 style={[
                                     styles.dot,
-                                    currentIndex === index && styles.activeDot,
+                                    {
+                                        width: currentIndex === index ? 24 : 8,
+                                        backgroundColor:
+                                            currentIndex === index
+                                                ? "#6C4FF8"
+                                                : "rgba(255,255,255,0.15)",
+                                    },
                                 ]}
                             />
                         ))}
                     </View>
-
-                    <TouchableOpacity onPress={handleNext}>
-                        <LinearGradient
-                            colors={["#8B5CF6", "#6D28D9"]}
-                            style={styles.button}
-                        >
-                            <Text style={styles.buttonText}>
-                                {currentIndex === slides.length - 1
-                                    ? "Get Started →"
-                                    : "Continue →"}
-                            </Text>
-                        </LinearGradient>
-
-                    </TouchableOpacity>
+                    <GradientButton
+                        title={
+                            currentIndex === slides.length - 1
+                                ? "Get Started →"
+                                : "Continue →"
+                        }
+                        onPress={handleNext}
+                        style={styles.button}
+                    />
                 </View>
             </LinearGradient>
         </SafeAreaView>
@@ -196,7 +263,7 @@ const styles = StyleSheet.create({
 
         borderRadius: 17,
 
-        borderWidth: 1,
+        borderWidth: 0.6,
         borderColor: "rgba(255,255,255,.10)",
 
         backgroundColor: "rgba(255,255,255,.03)",
@@ -208,7 +275,12 @@ const styles = StyleSheet.create({
     },
 
     skipText: {
-        color: "#C0C5D2",
+        color: "#83A9E3",
+        textAlign: "center",
+        fontFamily: "Consolas",
+        fontSize: 12,
+        fontWeight: "400",
+        lineHeight: 16,
     },
 
     slide: {
@@ -220,73 +292,93 @@ const styles = StyleSheet.create({
 
     },
 
-    glowOuter: {
-        width: 132,
-        height: 132,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-    glowRing: {
-        width: 108,
-        height: 108,
-        borderRadius: 54,
-        borderWidth: 1,
-        borderColor: "rgba(108,79,248,0.08)",
-        justifyContent: "center",
-        alignItems: "center",
-    },
     ringLarge: {
         position: "absolute",
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.05)",
+
+        width: 122,
+        height: 122,
+
+        borderRadius: 61,
+
+        borderWidth: 0.6,
     },
 
     ringMedium: {
         position: "absolute",
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.05)",
-    },
 
+        width: 94,
+        height: 94,
+
+        borderRadius: 47,
+
+        borderWidth: 0.6,
+    },
     ringSmall: {
         position: "absolute",
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.05)",
+
+        width: 66,
+        height: 66,
+
+        borderRadius: 33,
+
+        borderWidth: 0.6,
     },
     iconContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 24,
-
-        borderWidth: 0.8,
-        borderColor: "rgba(108,79,248,0.25)",
+        width: 84,
+        height: 84,
+        borderRadius: 26,
 
         justifyContent: "center",
         alignItems: "center",
+
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.10)",
+    },
+    glowOuter: {
+        width: 220,
+        height: 220,
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+    },
+    glowCircle1: {
+        position: "absolute",
+        width: 220,
+        height: 220,
+        borderRadius: 110,
+        opacity: 0.015,
     },
 
+    glowCircle2: {
+        position: "absolute",
+        width: 170,
+        height: 170,
+        borderRadius: 85,
+        opacity: 0.035,
+    },
+
+    glowCircle3: {
+        position: "absolute",
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        opacity: 0.08,
+    },
     robotIcon: {
         width: 42,
         height: 42,
     },
 
     title: {
-        marginTop: 32,
+        marginTop: 10,
         color: "#EEF2FF",
         textAlign: "center",
         fontSize: 30,
         fontFamily: "Outfit_700Bold",
         fontWeight: "700",
         lineHeight: 36,
+
+
     },
 
     iconGlow: {
@@ -312,44 +404,24 @@ const styles = StyleSheet.create({
     dots: {
         flexDirection: "row",
         justifyContent: "center",
+        alignItems: "center",
         marginBottom: 30,
     },
 
     dot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
+        height: 8,
+        width: 8,
+        borderRadius: 4,
         marginHorizontal: 4,
-        backgroundColor: "rgba(255,255,255,.20)",
     },
 
-    activeDot: {
-        width: 14,
-        borderRadius: 2,
-        backgroundColor: "#7C3AED",
-    },
+
 
     button: {
-        height: 60,
-        borderRadius: 14,
-        justifyContent: "center",
-        alignItems: "center",
-
-        shadowColor: "#7C3AED",
-        shadowOpacity: 0.45,
-        shadowRadius: 20,
-        shadowOffset: {
-            width: 0,
-            height: 10,
-        },
-        elevation: 15,
+        width: "100%",
     },
 
-    buttonText: {
-        color: "#FFF",
-        fontSize: 16,
-        fontWeight: "600",
-    },
+
     footer: {
         position: "absolute",
         left: 0,

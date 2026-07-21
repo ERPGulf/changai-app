@@ -14,7 +14,8 @@ import React, { useEffect, useState } from "react";
 import {
   Text,
   TouchableOpacity,
-  View
+  View,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
@@ -22,7 +23,7 @@ import utf8 from "utf8";
 import { Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "react-native";
-
+import GradientButton from "../components/common/GradientButton";
 
 import {
   setBaseUrl,
@@ -229,7 +230,12 @@ const QrScan: React.FC = () => {
           setEmployeeCode(cleanedData.employee_code)
         );
 
-        router.push("/Login");
+        router.push({
+          pathname: "/QrPreview",
+          params: {
+            data: JSON.stringify(cleanedData),
+          },
+        });
       } else {
         alert("Invalid QR code. Please try again.");
       }
@@ -277,178 +283,229 @@ const QrScan: React.FC = () => {
     }
   };
 
+
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#05010D" }}
-    >
-      <LinearGradient
-        colors={["#05010D", "#240046", "#5A189A", "#9D4EDD"]}
-        style={{ flex: 1 }}
-      >
-        {/* Header */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-            paddingTop: 5,
-          }}
-        >
-          <TouchableOpacity onPress={() => router.back()}>
-            <Entypo
-              name="chevron-left"
-              size={28}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#090B14" }}>
+      <StatusBar barStyle="light-content" />
 
-          <Text
-            style={{
-              color: "#FFFFFF",
-              fontSize: 22,
-              fontWeight: "700",
-            }}
-          >
-            Scan QR Code
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Scan your QR code</Text>
+          <Text style={styles.subtitle}>
+            Point your camera at the QR code
           </Text>
-
-          <View style={{ width: 28 }} />
         </View>
 
-        {/* Logo
-        <Image
-          source={require("../../assets/images/ChangAI1.png")}
-          style={{
-            width: 100,
-            height: 100,
-            alignSelf: "center",
-            marginTop: 10,
-            marginBottom: 15,
-          }}
-          resizeMode="contain"
-        /> */}
-
-        {/* Camera Card */}
-        <View
-          style={{
-            flex: 1,
-            marginHorizontal: 20,
-            gap: 50,
-            marginTop: 20,
-            marginBottom: 20,
-            backgroundColor: "rgba(255,255,255,0.05)",
-            borderRadius: 24,
-            overflow: "hidden",
-            borderWidth: 2,
-            borderColor: "rgba(255,255,255,0.2)",
-          }}
-        >
-          <CameraView
-            barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
-            }}
-            onBarcodeScanned={
-              scanned ? undefined : handleBarCodeScanned
-            }
-            facing="back"
-            style={{ flex: 1 }}
-          >
-            <View
-              style={{
-                position: "absolute",
-                top: "30%",
-                alignSelf: "center",
-                width: 240,
-                height: 240,
-                borderWidth: 3,
-                borderColor: "#FFFFFF",
-                borderRadius: 20,
-                justifyContent: "center",
-                alignItems: "center",
+        <View style={styles.scannerContainer}>
+          <View style={styles.qrContainer}>
+            <CameraView
+              style={styles.camera}
+              facing="back"
+              barcodeScannerSettings={{
+                barcodeTypes: ["qr"],
               }}
-            >
+              onBarcodeScanned={
+                scanned ? undefined : handleBarCodeScanned
+              }
+            />
+
+            <View style={styles.overlay} pointerEvents="none">
               <Ionicons
                 name="qr-code-outline"
-                size={160}
-                color="rgba(255,255,255,0.15)"
+                size={108}
+                color="rgba(255,255,255,0.12)"
               />
             </View>
-          </CameraView>
+
+            <View style={styles.cornerTopLeft} />
+            <View style={styles.cornerTopRight} />
+            <View style={styles.cornerBottomLeft} />
+            <View style={styles.cornerBottomRight} />
+          </View>
         </View>
 
-        {/* Bottom Buttons */}
-        <View
-          style={{
-            paddingHorizontal: 20,
-            paddingVertical: 20,
-          }}
-        >
+        <View style={styles.bottomContainer}>
           {scanned && (
             <TouchableOpacity
-              style={{
-                height: 56,
-                borderRadius: 16,
-                backgroundColor:
-                  "rgba(255,255,255,0.15)",
-                borderWidth: 1,
-                borderColor:
-                  "rgba(255,255,255,0.25)",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "row",
-                marginBottom: 12,
-              }}
+              style={styles.scanAgainButton}
               onPress={() => setScanned(false)}
             >
-              <Ionicons
-                name="scan-outline"
-                size={22}
-                color="#FFFFFF"
-              />
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  marginLeft: 8,
-                  fontWeight: "700",
-                }}
-              >
+              <Text style={styles.scanAgainText}>
                 Scan Again
               </Text>
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
-            style={{
-              height: 56,
-              borderRadius: 16,
-              backgroundColor: "#FFFFFF",
-              justifyContent: "center",
-              alignItems: "center",
-              flexDirection: "row",
-            }}
+          <GradientButton
+            title="Upload from Files / Photos"
             onPress={pickImage}
-          >
-            <Ionicons
-              name="image"
-              size={22}
-              color="#7C3AED"
-            />
+          />
 
-            <Text
-              style={{
-                color: "#7C3AED",
-                marginLeft: 8,
-                fontWeight: "700",
-              }}
-            >
-              Select From Photos
-            </Text>
-          </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
     </SafeAreaView>
   );
 };
 
 export default QrScan;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#090B14",
+    paddingHorizontal: 20,
+  },
+
+  header: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+
+  title: {
+    color: "#F8FAFC",
+    fontSize: 20,
+    fontFamily: "Outfit_700Bold",
+    lineHeight: 34,
+    fontWeight: "700",
+  },
+
+  subtitle: {
+    width: 240,
+    color: "#7A8FAF",
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    lineHeight: 22.75,
+  },
+
+  scannerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: -40,
+  },
+
+  qrContainer: {
+    width: 240,
+    height: 240,
+    overflow: "hidden",
+    borderRadius: 20,
+    backgroundColor: "#000",
+  },
+
+  camera: {
+    width: "100%",
+    height: "100%",
+  },
+
+  overlay: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  qrIcon: {
+    opacity: 0.15,
+  },
+
+  cornerTopLeft: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 30,
+    height: 30,
+    borderTopWidth: 3,
+    borderLeftWidth: 3,
+    borderColor: "#6C4FF8",
+    borderTopLeftRadius: 12,
+  },
+
+  cornerTopRight: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    width: 30,
+    height: 30,
+    borderTopWidth: 3,
+    borderRightWidth: 3,
+    borderColor: "#6C4FF8",
+    borderTopRightRadius: 12,
+  },
+
+  cornerBottomLeft: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: 30,
+    height: 30,
+    borderBottomWidth: 3,
+    borderLeftWidth: 3,
+    borderColor: "#6C4FF8",
+    borderBottomLeftRadius: 12,
+  },
+
+  cornerBottomRight: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 30,
+    height: 30,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    borderColor: "#6C4FF8",
+    borderBottomRightRadius: 12,
+  },
+
+  bottomContainer: {
+    marginBottom: 28,
+  },
+
+  scanAgainButton: {
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: "#1C2230",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  scanAgainText: {
+    color: "#FFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  uploadButton: {
+    width: 270,
+    height: 56,
+    alignSelf: "center",
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+
+    shadowColor: "#6C4FF8",
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    elevation: 12,
+  },
+
+  uploadText: {
+    color: "#FFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  footerText: {
+    marginTop: 56,
+    color: "#667085",
+    textAlign: "center",
+    fontSize: 12,
+  },
+});
