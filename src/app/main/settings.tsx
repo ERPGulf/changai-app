@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-    SafeAreaView,
     View,
     Text,
     StyleSheet,
@@ -9,27 +8,58 @@ import {
     ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useSelector } from "react-redux";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function Settings() {
     const [speakEnabled, setSpeakEnabled] = useState(true);
     const [refreshEnabled, setRefreshEnabled] = useState(true);
     const [alertEnabled, setAlertEnabled] = useState(true);
+    const { fullname, userDetails } = useSelector(
+        (state: any) => state.user
+    );
 
+    const designation =
+        userDetails?.designation || userDetails?.designation_name || "Employee";
+
+    const email = userDetails?.email || "";
+
+    const initials =
+        fullname
+            ?.split(" ")
+            .map((word: string) => word.charAt(0))
+            .join("")
+            .substring(0, 2)
+            .toUpperCase() || "NA";
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+        <SafeAreaView
+            style={styles.container}
+            edges={["top"]}
+        >
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
+            >
                 <Text style={styles.title}>Settings</Text>
 
                 {/* Profile */}
                 <View style={styles.profileCard}>
-                    <View style={styles.avatar}>
-                        <Text style={styles.avatarText}>SJ</Text>
-                    </View>
+                    <LinearGradient
+                        colors={["#6C4FF8", "#00D4B4"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.avatar}
+                    >
+                        <Text style={styles.avatarText}>{initials}</Text>
+                    </LinearGradient>
 
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.name}>Sarah Johnson</Text>
-                        <Text style={styles.role}>Employee</Text>
-                        <Text style={styles.email}>Email</Text>
+                        <Text style={styles.name}>{fullname || "Employee"}</Text>
+                        <Text style={styles.role}>{designation}</Text>
+
+                        {!!email && (
+                            <Text style={styles.email}>{email}</Text>
+                        )}
                     </View>
                 </View>
 
@@ -147,21 +177,28 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        fontSize: 28,
         color: "#FFF",
-        fontWeight: "700",
-        marginTop: 20,
+        fontFamily: "outfit-bold",
+        fontSize: 20,
+        lineHeight: 28,
+        marginTop: 16,
         marginBottom: 24,
+    },
+    content: {
+        paddingBottom: 24,
     },
 
     profileCard: {
-        backgroundColor: "#151D2E",
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.06)",
         flexDirection: "row",
         alignItems: "center",
+
         padding: 16,
+
+        borderRadius: 16,
+        borderWidth: 0.8,
+        borderColor: "rgba(255,255,255,0.07)",
+        backgroundColor: "#0F1521",
+
         marginBottom: 28,
     },
 
@@ -169,16 +206,17 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 16,
-        backgroundColor: "#6C4FF8",
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 14,
+
+        marginRight: 16,
     },
 
     avatarText: {
-        color: "#FFF",
-        fontWeight: "700",
+        color: "#FFFFFF",
         fontSize: 20,
+        fontFamily: "outfit-semibold",
+        lineHeight: 24,
     },
 
     name: {

@@ -236,14 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#080C14",
   },
 
-  // header: {
-  //   paddingHorizontal: 16,
-  //   paddingTop: 10,
-  //   paddingBottom: 14,
-  //   flexDirection: "row",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  // },
+  
   header: {
     paddingHorizontal: 16,
     paddingBottom: 14,

@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Animated } from "react-native";
+import IconGlow from "../components/common/IconGlow";
 const { width, height } = Dimensions.get("window");
 // const finishOnboarding = async () => {
 //     try {
@@ -130,9 +131,10 @@ export default function Onboarding() {
                     renderItem={({ item }) => (
                         <Animated.View style={[styles.slide, { opacity: fadeAnim }]}>
                             <View style={styles.glowOuter}>
+                                <IconGlow color={item.iconColor} />
 
                                 {/* Glow */}
-                                <View
+                                {/* <View
                                     style={[
                                         styles.glowCircle1,
                                         { backgroundColor: item.iconColor },
@@ -151,7 +153,7 @@ export default function Onboarding() {
                                         styles.glowCircle3,
                                         { backgroundColor: item.iconColor },
                                     ]}
-                                />
+                                /> */}
 
                                 {/* Rings */}
                                 <View
@@ -341,29 +343,29 @@ const styles = StyleSheet.create({
         alignItems: "center",
         position: "relative",
     },
-    glowCircle1: {
-        position: "absolute",
-        width: 220,
-        height: 220,
-        borderRadius: 110,
-        opacity: 0.015,
-    },
+    // glowCircle1: {
+    //     position: "absolute",
+    //     width: 220,
+    //     height: 220,
+    //     borderRadius: 110,
+    //     opacity: 0.015,
+    // },
 
-    glowCircle2: {
-        position: "absolute",
-        width: 170,
-        height: 170,
-        borderRadius: 85,
-        opacity: 0.035,
-    },
+    // glowCircle2: {
+    //     position: "absolute",
+    //     width: 170,
+    //     height: 170,
+    //     borderRadius: 85,
+    //     opacity: 0.035,
+    // },
 
-    glowCircle3: {
-        position: "absolute",
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        opacity: 0.08,
-    },
+    // glowCircle3: {
+    //     position: "absolute",
+    //     width: 120,
+    //     height: 120,
+    //     borderRadius: 60,
+    //     opacity: 0.08,
+    // },
     robotIcon: {
         width: 42,
         height: 42,
