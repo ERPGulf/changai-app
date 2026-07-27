@@ -29,7 +29,7 @@ export default function Header({
       <TouchableOpacity style={styles.notification}>
         <Ionicons
           name="notifications-outline"
-          size={20}
+          size={18}
           color="#A5B3CE"
         />
 
@@ -49,25 +49,28 @@ const styles = StyleSheet.create({
 
   greeting: {
     color: "#7A8FAF",
-    fontSize: 10,
+    fontSize: 12,
+    fontWeight: 400,
     letterSpacing: 2,
     fontFamily: "outfit-medium",
+    lineHeight : 16,
   },
 
   name: {
     marginTop: 4,
     color: "#FFFFFF",
-    fontSize: 28,
-    lineHeight: 34,
+    fontSize: 20,
+    lineHeight: 28,
     fontFamily: "outfit-bold",
+    fontWeight: 700,
   },
 
   notification: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 16,
 
-    backgroundColor: "#171D2E",
+    backgroundColor: "#151D2E",
 
     justifyContent: "center",
     alignItems: "center",

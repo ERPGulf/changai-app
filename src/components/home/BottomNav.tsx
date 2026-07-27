@@ -1,39 +1,97 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { router, usePathname } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function BottomNav() {
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+
   return (
     <View style={styles.container}>
+
       {/* Home */}
-      <TouchableOpacity style={styles.item}>
-        <View style={styles.activeIcon}>
-          <Ionicons name="home-outline" size={18} color="#FFFFFF" />
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => router.replace("/main/Home")}
+      >
+        <View
+          style={[
+            styles.iconContainer,
+            pathname === "/main/Home" && styles.activeIcon,
+          ]}
+        >
+          <Ionicons
+            name="home-outline"
+            size={20}
+            color={pathname === "/main/Home" ? "#FFF" : "#7A8FAF"}
+          />
         </View>
 
-        <Text style={styles.activeText}>Home</Text>
+        <Text
+          style={[
+            styles.text,
+            pathname === "/main/Home" && styles.activeText,
+          ]}
+        >
+          Home
+        </Text>
       </TouchableOpacity>
 
-      {/* Chat */}
-      <TouchableOpacity style={styles.item}>
-        <Ionicons
-          name="chatbubble-outline"
-          size={18}
-          color="#8A96B6"
-        />
+      {/* changAI */}
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => router.replace("/main/changAI")}
+      >
+        <View
+          style={[
+            styles.iconContainer,
+            pathname === "/main/changAI" && styles.activeIcon,
+          ]}
+        >
+          <Ionicons
+            name="chatbubble-outline"
+            size={20}
+            color={pathname === "/main/changAI" ? "#FFF" : "#7A8FAF"}
+          />
+        </View>
 
-        <Text style={styles.text}>changAI</Text>
+        <Text
+          style={[
+            styles.text,
+            pathname === "/main/changAI" && styles.activeText,
+          ]}
+        >
+          changAI
+        </Text>
       </TouchableOpacity>
 
       {/* Settings */}
-      <TouchableOpacity style={styles.item}>
-        <Ionicons
-          name="settings-outline"
-          size={18}
-          color="#8A96B6"
-        />
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => router.replace("/main/settings")}
+      >
+        <View
+          style={[
+            styles.iconContainer,
+            pathname === "/main/settings" && styles.activeIcon,
+          ]}
+        >
+          <Ionicons
+            name="settings-outline"
+            size={20}
+            color={pathname === "/main/settings" ? "#FFF" : "#7A8FAF"}
+          />
+        </View>
 
-        <Text style={styles.text}>Settings</Text>
+        <Text
+          style={[
+            styles.text,
+            pathname === "/main/settings" && styles.activeText,
+          ]}
+        >
+          Settings
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -41,53 +99,70 @@ export default function BottomNav() {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 24,
-
-    height: 68,
 
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "center",
+    
+    marginHorizontal: 16,
 
-    backgroundColor: "#151D2E",
+    marginBottom: 16,
 
-    borderRadius: 22,
+    paddingTop: 10,
 
-    borderWidth: 0.8,
+    paddingBottom: 10,
+
+    borderRadius: 20,
+
+    backgroundColor: "#101827",
+
+
+    borderTopWidth: 0.8,
     borderColor: "rgba(255,255,255,0.07)",
+
   },
 
   item: {
-    alignItems: "center",
+    flex: 1,
+
     justifyContent: "center",
+
+    alignItems: "center",
+  },
+
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+
   },
 
   activeIcon: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     borderRadius: 16,
-
     backgroundColor: "#6C4FF8",
-
     justifyContent: "center",
     alignItems: "center",
 
-    marginBottom: 6,
-  },
-
-  activeText: {
-    fontSize: 10,
-    color: "#6C4FF8",
-    fontFamily: "outfit-medium",
   },
 
   text: {
-    marginTop: 6,
-    fontSize: 10,
+    marginTop: 4, // same as Figma gap
+    fontSize: 9,
+    lineHeight: 12,
     color: "#7A8FAF",
+    fontFamily: "outfit-medium",
+  },
+
+  activeText: {
+    marginTop: 4,
+    fontSize: 9,
+    lineHeight: 12,
+    color: "#6C4FF8",
     fontFamily: "outfit-medium",
   },
 });

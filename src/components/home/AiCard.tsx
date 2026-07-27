@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { Image } from "expo-image";
 export default function AiCard() {
   const chips = [
     "Summarise data",
@@ -21,10 +21,9 @@ export default function AiCard() {
       <View style={styles.topRow}>
         <View style={styles.leftSection}>
           <View style={styles.iconContainer}>
-            <Ionicons
-              name="briefcase-outline"
-              size={18}
-              color="#8B5CF6"
+            <Image
+              source={require("../../../assets/images/Icon.png")}
+              style={styles.logo}
             />
           </View>
 
@@ -78,22 +77,29 @@ export default function AiCard() {
 
 const styles = StyleSheet.create({
   card: {
-    marginTop: 18,
+    marginTop: 20,
+    alignSelf: "stretch",
 
-    backgroundColor: "#151D2E",
+    minHeight: 282,   // <-- instead of height: 282
+
+    padding: 20,
+
+    backgroundColor: "#0F1521",
 
     borderRadius: 24,
 
     borderWidth: 0.8,
-    borderColor: "rgba(255,255,255,0.06)",
-
-    padding: 16,
+    borderColor: "rgba(255,255,255,0.07)",
   },
 
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+
+    width: "100%",
+
+    marginBottom: 20,
   },
 
   leftSection: {
@@ -102,17 +108,18 @@ const styles = StyleSheet.create({
   },
 
   iconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
 
-    backgroundColor: "#0E1020",
+    borderRadius: 16,
+
+    backgroundColor: "#181F30",
 
     justifyContent: "center",
     alignItems: "center",
 
     borderWidth: 1,
-    borderColor: "#6C4FF8",
+    borderColor: "#6D4FC2",
   },
 
   titleContainer: {
@@ -122,13 +129,19 @@ const styles = StyleSheet.create({
   title: {
     color: "#FFFFFF",
     fontSize: 16,
+    fontWeight: 700,
+    lineHeight: 16,
     fontFamily: "outfit-bold",
   },
-
   subtitle: {
     marginTop: 2,
-    color: "#8A96B6",
-    fontSize: 11,
+
+    color: "#7A8FAF",
+
+    fontSize: 12,
+    fontWeight: 400,
+    lineHeight: 16,
+
     fontFamily: "outfit-regular",
   },
 
@@ -158,44 +171,54 @@ const styles = StyleSheet.create({
     color: "#00D4B4",
     fontSize: 11,
     fontFamily: "outfit-medium",
+    fontWeight: 500,
   },
 
   description: {
-    marginTop: 18,
+    marginTop: 8,
 
-    color: "#C5CBDD",
+    color: "#C9D3E8",
 
-    fontSize: 15,
-    lineHeight: 27,
+    fontSize: 14,
+    lineHeight: 24,
+    fontWeight: 400,
 
     fontFamily: "outfit-regular",
   },
-
   chipContainer: {
+    minHeight: 59.175,
+    alignSelf: "stretch",
+
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "flex-start",
 
-    marginTop: 18,
+    marginTop: 24,
   },
 
   chip: {
-    backgroundColor: "#1B2438",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
 
     borderRadius: 16,
 
-    borderWidth: 1,
-    borderColor: "#2A3552",
+    backgroundColor: "#181F30",
 
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderWidth: 0.8,
+    borderColor: "rgba(255,255,255,0.07)",
 
     marginRight: 8,
     marginBottom: 8,
   },
-
   chipText: {
-    color: "#8FA2C8",
-    fontSize: 11,
+    color: "#7A8FAF",
+    fontSize: 12,
     fontFamily: "outfit-medium",
+    fontWeight: 500,
+    lineHeight: 16,
+  },
+  logo: {
+    width: 22,
+    height: 22,
   },
 });

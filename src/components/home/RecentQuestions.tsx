@@ -1,11 +1,12 @@
 import React from "react";
 import {
   View,
- Text,
+  Text,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const questions = [
   "Show today's sales performance",
@@ -30,8 +31,8 @@ export default function RecentQuestions() {
             <View style={styles.iconContainer}>
               <Ionicons
                 name="time-outline"
-                size={18}
-                color="#8A96B6"
+                size={13}
+                color="#7A8FAF"
               />
             </View>
 
@@ -43,9 +44,9 @@ export default function RecentQuestions() {
             </Text>
           </View>
 
-          <Ionicons
-            name="chevron-forward"
-            size={18}
+          <MaterialCommunityIcons
+            name="arrow-top-right"
+            size={13}
             color="#7A8FAF"
           />
         </TouchableOpacity>
@@ -62,53 +63,62 @@ const styles = StyleSheet.create({
   heading: {
     color: "#FFFFFF",
     fontSize: 20,
+    lineHeight: 28,
     fontFamily: "outfit-bold",
-    marginBottom: 18,
+    marginBottom: 16,
   },
 
   card: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
 
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+
+    minHeight: 59,
+
+    borderRadius: 20,
     backgroundColor: "#151D2E",
-
-    borderRadius: 18,
-
     borderWidth: 0.8,
     borderColor: "rgba(255,255,255,0.07)",
 
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-
-    marginBottom: 14,
+    marginBottom: 10,
   },
 
   leftSection: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
+
+    marginRight: 12, // Figma gap between text and arrow
   },
 
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-
-    backgroundColor: "#1D2438",
+    width: 18,
+    height: 18,
 
     justifyContent: "center",
     alignItems: "center",
 
-    marginRight: 14,
+    marginRight: 12,
   },
 
   question: {
     flex: 1,
-    color: "#FFFFFF",
+
+    color: "#C9D3E8",
+
     fontSize: 14,
     lineHeight: 20,
-    fontFamily: "outfit-medium",
-    paddingRight: 12,
+
+    fontFamily: "outfit-regular",
+  },
+  arrow: {
+    marginLeft: 12, 
+    height: 13,
+    width: 13,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

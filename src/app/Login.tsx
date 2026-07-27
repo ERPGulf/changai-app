@@ -52,7 +52,7 @@ export default function Login() {
 
     try {
       await generateToken(password);
-      router.replace("/Home");
+      router.replace("/main/Home");
     } catch (error: any) {
       Alert.alert("Login Failed", error.message);
     }
@@ -180,9 +180,7 @@ export default function Login() {
       {/* Login Button */}
       <GradientButton
         title="Login →"
-        onPress={() => {
-          router.replace("/Home");
-        }}
+        onPress={handleLogin}
       />
 
       {/* Rescan */}
