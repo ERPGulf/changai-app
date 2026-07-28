@@ -8,24 +8,44 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import IconGlow from "../components/common/IconGlow";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Background from "../components/common/Background";
 export default function Splash() {
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-  const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
+  const iconOpacity = React.useRef(new Animated.Value(0)).current;
+  const iconScale = React.useRef(new Animated.Value(0.85)).current;
 
+  const titleOpacity = React.useRef(new Animated.Value(0)).current;
+  const subtitleOpacity = React.useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
+      Animated.timing(iconOpacity, {
         toValue: 1,
-        duration: 900,
+        duration: 800,
         useNativeDriver: true,
       }),
-      Animated.timing(scaleAnim, {
+
+      Animated.spring(iconScale, {
         toValue: 1,
-        duration: 900,
+        friction: 6,
+        tension: 70,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(() => {
+      Animated.timing(titleOpacity, {
+        toValue: 1,
+        duration: 500,
+        delay: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.timing(subtitleOpacity, {
+          toValue: 1,
+          duration: 500,
+          delay: 150,
+          useNativeDriver: true,
+        }).start();
+      });
+    });
 
     // const checkAppState = async () => {
     //   try {
@@ -59,51 +79,62 @@ export default function Splash() {
   }, []);
 
   return (
-    <LinearGradient
-      colors={[
-        "#140C2D",
-        "#0B0E1B",
-        "#071018",
-        "#050A12",
-      ]}
-      locations={[0, 0.28, 0.65, 1]}
-      style={styles.container}
-    >
-      {/* Purple Glow */}
-      <Animated.View
-        style={[
-          styles.centerContainer,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
+    <Background>
+      <View style={styles.centerContainer}>
 
-        <View style={styles.glowLarge} />
-        <View style={styles.glowMedium} />
-        <View style={styles.glowSmall} />
-        {/* <View style={styles.ring4} />
-        <View style={styles.ring3} />
-        <View style={styles.ring2} />
-        <View style={styles.ring1} /> */}
-
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("../../assets/images/Icon.png")}
-            style={styles.logo}
+        <Animated.View
+          style={{
+            opacity: iconOpacity,
+            transform: [{ scale: iconScale }],
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconGlow
+            color="#6C4FF8"
+            size={380}
           />
-        </View>
 
-        <Text style={styles.title}>changAI</Text>
-        <Text style={styles.subtitle}>ERP INTELLIGENCE</Text>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/images/Icon.png")}
+              style={styles.logo}
+            />
+          </View>
+        </Animated.View>
 
-      </Animated.View>
+        <Animated.View
+          style={{
+            opacity: titleOpacity,
+            marginTop: 36,
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.title}>
+            changAI
+          </Text>
+        </Animated.View>
+
+        <Animated.View
+          style={{
+            opacity: subtitleOpacity,
+            marginTop: 4,
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.subtitle}>
+            ERP INTELLIGENCE
+          </Text>
+        </Animated.View>
+
+      </View>
+
+
       <View style={styles.footer}>
         <Text style={styles.powered}>Powered by</Text>
         <Text style={styles.company}>ERPGulf</Text>
       </View>
-    </LinearGradient>
+    </Background>
   );
 }
 
@@ -114,77 +145,42 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // ring4: {
-  //   position: "absolute",
-  //   width: 320,
-  //   height: 320,
-  //   borderRadius: 160,
 
-  //   borderWidth: .8,
-  //   borderColor: "rgba(255,255,255,.05)",
-  // },
-
-  // ring3: {
-  //   position: "absolute",
-  //   width: 260,
-  //   height: 260,
-  //   borderRadius: 130,
-
-  //   borderWidth: .8,
-  //   borderColor: "rgba(255,255,255,.04)",
-  // },
-
-  // ring2: {
-  //   position: "absolute",
-  //   width: 200,
-  //   height: 200,
-  //   borderRadius: 100,
-
-  //   borderWidth: .8,
-  //   borderColor: "rgba(255,255,255,.03)",
-  // },
-
-  // ring1: {
-  //   position: "absolute",
-  //   width: 140,
-  //   height: 140,
-  //   borderRadius: 70,
-
-  //   borderWidth: .8,
-  //   borderColor: "rgba(255,255,255,.02)",
-  // },
 
   centerContainer: {
     position: "absolute",
-    top: "39%",
+    top: "42%",
     left: 0,
     right: 0,
     alignItems: "center",
     justifyContent: "center",
+    transform: [
+      { translateY: -90 }, // Move the whole logo block upward
+    ],
   },
 
 
-  glowLarge: {
-    position: "absolute",
-    width: 320,
-    height: 320,
-    borderRadius: 160,
-    backgroundColor: "rgba(108,79,248,0.035)",
-  },
-  glowMedium: {
-    position: "absolute",
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: "rgba(108,79,248,0.055)",
-  },
-  glowSmall: {
-    position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: "rgba(108,79,248,0.08)",
-  },
+  // glowLarge: {
+  //   position: "absolute",
+  //   width: 320,
+  //   height: 320,
+  //   borderRadius: 160,
+  //   backgroundColor: "rgba(108,79,248,0.035)",
+  // },
+  // glowMedium: {
+  //   position: "absolute",
+  //   width: 250,
+  //   height: 250,
+  //   borderRadius: 125,
+  //   backgroundColor: "rgba(108,79,248,0.055)",
+  // },
+  // glowSmall: {
+  //   position: "absolute",
+  //   width: 180,
+  //   height: 180,
+  //   borderRadius: 90,
+  //   backgroundColor: "rgba(108,79,248,0.08)",
+  // },
   logoContainer: {
     width: 96,
     height: 96,
@@ -216,14 +212,22 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    marginTop: 18,
-    fontSize: 26,
-    fontWeight: "700",
+    marginTop: 0,
+
     color: "#FFF",
+
+    fontFamily: "Outfit_700Bold",
+    fontSize: 36,
+    fontWeight: "700",
+
+    lineHeight: 40,
+    letterSpacing: -0.9,
+
+    textAlign: "center",
   },
 
   subtitle: {
-    marginTop: 4,
+    marginTop: 0,
     fontSize: 9,
     letterSpacing: 2.4,
     color: "rgba(255,255,255,0.42)",
