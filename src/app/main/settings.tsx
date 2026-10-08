@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
 
     title: {
         color: "#FFF",
-        fontFamily: "outfit-bold",
+        fontFamily: "Outfit_700Bold",
         fontSize: 20,
         lineHeight: 28,
         marginTop: 16,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     avatarText: {
         color: "#FFFFFF",
         fontSize: 20,
-        fontFamily: "outfit-semibold",
+        fontFamily: "Outfit_600SemiBold",
         lineHeight: 24,
     },
 

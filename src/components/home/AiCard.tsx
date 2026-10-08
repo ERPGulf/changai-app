@@ -1,31 +1,45 @@
 import React from "react";
 import {
+  Platform,
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-export default function AiCard() {
-  const chips = [
-    "Summarise data",
-    "Ask questions",
-    "Spot trends",
-    "Raise alerts",
-  ];
+import { LinearGradient } from "expo-linear-gradient";
 
+const MONO_FONT = Platform.select({ ios: "Menlo", default: "monospace" });
+
+const chips = [
+  "Summarise data",
+  "Ask questions",
+  "Spot trends",
+  "Raise alerts",
+];
+
+export default function AiCard() {
   return (
-    <View style={styles.card}>
+    <LinearGradient
+      colors={["#16163A", "#0F1521"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.6, y: 1 }}
+      style={styles.card}
+    >
       {/* Top Row */}
       <View style={styles.topRow}>
         <View style={styles.leftSection}>
-          <View style={styles.iconContainer}>
+          <LinearGradient
+            colors={["#2A1F5C", "#1A1538"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.iconContainer}
+          >
             <Image
               source={require("../../../assets/images/Icon.png")}
               style={styles.logo}
             />
-          </View>
+          </LinearGradient>
 
           <View style={styles.titleContainer}>
             <Text style={styles.title}>
@@ -48,17 +62,13 @@ export default function AiCard() {
       </View>
 
       {/* Description */}
-
       <Text style={styles.description}>
-        Your AI assistant that listens and
-        understands your entire business in
-        real time, connected directly to your
-        ERP across Sales, Inventory,
-        Finance, and HR.
+        Your AI assistant that listens and understands your
+        entire business in real time, connected directly to
+        your ERP across Sales, Inventory, Finance, and HR.
       </Text>
 
       {/* Chips */}
-
       <View style={styles.chipContainer}>
         {chips.map((item) => (
           <TouchableOpacity
@@ -71,7 +81,7 @@ export default function AiCard() {
           </TouchableOpacity>
         ))}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -80,15 +90,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignSelf: "stretch",
 
-    minHeight: 282,   // <-- instead of height: 282
+    padding: 18,
 
-    padding: 20,
+    borderRadius: 20,
 
-    backgroundColor: "#0F1521",
-
-    borderRadius: 24,
-
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
   },
 
@@ -97,9 +103,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
 
-    width: "100%",
-
-    marginBottom: 20,
+    marginBottom: 16,
   },
 
   leftSection: {
@@ -108,18 +112,21 @@ const styles = StyleSheet.create({
   },
 
   iconContainer: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
 
-    borderRadius: 16,
-
-    backgroundColor: "#181F30",
+    borderRadius: 12,
 
     justifyContent: "center",
     alignItems: "center",
 
     borderWidth: 1,
-    borderColor: "#6D4FC2",
+    borderColor: "rgba(108,79,248,0.45)",
+  },
+
+  logo: {
+    width: 22,
+    height: 22,
   },
 
   titleContainer: {
@@ -129,96 +136,77 @@ const styles = StyleSheet.create({
   title: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 700,
-    lineHeight: 16,
-    fontFamily: "outfit-bold",
+    lineHeight: 20,
+    fontFamily: "Outfit_600SemiBold",
   },
+
   subtitle: {
     marginTop: 2,
-
     color: "#7A8FAF",
-
-    fontSize: 12,
-    fontWeight: 400,
-    lineHeight: 16,
-
-    fontFamily: "outfit-regular",
+    fontSize: 10,
+    lineHeight: 14,
+    fontFamily: MONO_FONT,
   },
 
   liveBadge: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 6,
 
-    backgroundColor: "#103A37",
+    backgroundColor: "rgba(0,212,180,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,180,0.25)",
 
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
 
-    borderRadius: 20,
+    borderRadius: 999,
   },
 
   liveDot: {
-    width: 6,
-    height: 6,
+    width: 5,
+    height: 5,
     borderRadius: 3,
-
     backgroundColor: "#00D4B4",
-
-    marginRight: 6,
   },
 
   liveText: {
     color: "#00D4B4",
-    fontSize: 11,
-    fontFamily: "outfit-medium",
-    fontWeight: 500,
+    fontSize: 10,
+    fontFamily: MONO_FONT,
   },
 
   description: {
-    marginTop: 8,
-
     color: "#C9D3E8",
-
-    fontSize: 14,
-    lineHeight: 24,
-    fontWeight: 400,
-
-    fontFamily: "outfit-regular",
+    fontSize: 13,
+    lineHeight: 21,
+    fontFamily: "Inter_400Regular",
   },
-  chipContainer: {
-    minHeight: 59.175,
-    alignSelf: "stretch",
 
+  chipContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    alignItems: "flex-start",
+    gap: 8,
 
-    marginTop: 24,
+    marginTop: 16,
   },
 
   chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
 
-    borderRadius: 16,
+    borderRadius: 8,
 
     backgroundColor: "#181F30",
 
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
-
-    marginRight: 8,
-    marginBottom: 8,
   },
+
   chipText: {
     color: "#7A8FAF",
-    fontSize: 12,
-    fontFamily: "outfit-medium",
-    fontWeight: 500,
-    lineHeight: 16,
-  },
-  logo: {
-    width: 22,
-    height: 22,
+    fontSize: 10,
+    lineHeight: 14,
+    fontFamily: MONO_FONT,
   },
 });

@@ -1,14 +1,24 @@
 import React from "react";
 import {
+  Platform,
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+
+const MONO_FONT = Platform.select({ ios: "Menlo", default: "monospace" });
 
 interface HeaderProps {
   name: string;
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "GOOD MORNING";
+  if (hour < 17) return "GOOD AFTERNOON";
+  return "GOOD EVENING";
 }
 
 export default function Header({
@@ -16,20 +26,20 @@ export default function Header({
 }: HeaderProps) {
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.textBlock}>
         <Text style={styles.greeting}>
-          GOOD MORNING
+          {getGreeting()}
         </Text>
 
-        <Text style={styles.name}>
+        <Text style={styles.name} numberOfLines={1}>
           {name}
         </Text>
       </View>
 
       <TouchableOpacity style={styles.notification}>
-        <Ionicons
-          name="notifications-outline"
-          size={18}
+        <Feather
+          name="bell"
+          size={15}
           color="#A5B3CE"
         />
 
@@ -47,13 +57,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  textBlock: {
+    flex: 1,
+    marginRight: 12,
+  },
+
   greeting: {
     color: "#7A8FAF",
-    fontSize: 12,
-    fontWeight: 400,
-    letterSpacing: 2,
-    fontFamily: "outfit-medium",
-    lineHeight : 16,
+    fontSize: 10,
+    letterSpacing: 1.5,
+    fontFamily: MONO_FONT,
+    lineHeight: 14,
   },
 
   name: {
@@ -61,16 +75,17 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 20,
     lineHeight: 28,
-    fontFamily: "outfit-bold",
-    fontWeight: 700,
+    fontFamily: "Outfit_700Bold",
   },
 
   notification: {
-    width: 40,
-    height: 40,
-    borderRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
 
     backgroundColor: "#151D2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.07)",
 
     justifyContent: "center",
     alignItems: "center",
@@ -78,13 +93,15 @@ const styles = StyleSheet.create({
 
   dot: {
     position: "absolute",
-    top: 11,
-    right: 11,
+    top: -2,
+    right: -2,
 
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
 
     backgroundColor: "#00D4B4",
+    borderWidth: 2,
+    borderColor: "#090B14",
   },
 });

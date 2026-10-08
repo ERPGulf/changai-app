@@ -9,9 +9,10 @@ import {
   useCameraPermissions,
 } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
-import { Stack, router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { Stack, router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Linking,
   Text,
   TouchableOpacity,
   View,
@@ -72,13 +73,43 @@ const QrScan: React.FC = () => {
 
   const [scanned, setScanned] = useState<boolean>(false);
 
+  // onBarcodeScanned fires per frame, so state alone can't stop repeat calls
+  const scanLock = useRef(false);
+
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    if (!permission?.granted) {
+    if (
+      permission &&
+      !permission.granted &&
+      permission.canAskAgain
+    ) {
       requestPermission();
     }
-  }, [permission]);
+    // only ask once on mount; later asks go through the button
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [permission?.status]);
+
+  // Re-arm the scanner when coming back from QrPreview
+  useFocusEffect(
+    useCallback(() => {
+      scanLock.current = false;
+      setScanned(false);
+    }, [])
+  );
+
+  const resetScan = (): void => {
+    scanLock.current = false;
+    setScanned(false);
+  };
+
+  const handlePermissionPress = async (): Promise<void> => {
+    if (permission?.canAskAgain) {
+      await requestPermission();
+    } else {
+      await Linking.openSettings();
+    }
+  };
 
 
 
@@ -248,6 +279,8 @@ const QrScan: React.FC = () => {
   const handleBarCodeScanned = async ({
     data,
   }: BarcodeScanningResult): Promise<void> => {
+    if (scanLock.current) return;
+    scanLock.current = true;
     console.log("Raw QR Data:", data);
     setScanned(true);
     await handleQRCodeData(data);
@@ -257,8 +290,7 @@ const QrScan: React.FC = () => {
     try {
       const result =
         await ImagePicker.launchImageLibraryAsync({
-          mediaTypes:
-            ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: ["images"],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 1,
@@ -276,6 +308,8 @@ const QrScan: React.FC = () => {
           await handleQRCodeData(
             scannedResults[0].data
           );
+        } else {
+          alert("No QR-CODE Found");
         }
       }
     } catch {
@@ -298,50 +332,92 @@ const QrScan: React.FC = () => {
 
         <View style={styles.scannerContainer}>
           <View style={styles.qrContainer}>
-            <CameraView
-              style={styles.camera}
-              facing="back"
-              barcodeScannerSettings={{
-                barcodeTypes: ["qr"],
-              }}
-              onBarcodeScanned={
-                scanned ? undefined : handleBarCodeScanned
-              }
-            />
+            {permission?.granted ? (
+              <>
+                <CameraView
+                  style={styles.camera}
+                  facing="back"
+                  barcodeScannerSettings={{
+                    barcodeTypes: ["qr"],
+                  }}
+                  onBarcodeScanned={
+                    scanned ? undefined : handleBarCodeScanned
+                  }
+                />
 
-            <View style={styles.overlay} pointerEvents="none">
-              <Ionicons
-                name="qr-code-outline"
-                size={108}
-                color="rgba(255,255,255,0.12)"
-              />
-            </View>
+                <View style={styles.overlay} pointerEvents="none">
+                  <Ionicons
+                    name="qr-code-outline"
+                    size={108}
+                    color="rgba(255,255,255,0.12)"
+                  />
+                </View>
+              </>
+            ) : (
+              <View style={styles.overlay}>
+                <Ionicons
+                  name="camera-outline"
+                  size={40}
+                  color="#7A8FAF"
+                />
+                <Text style={styles.permissionText}>
+                  Camera access is needed to scan
+                </Text>
+                {permission && (
+                  <TouchableOpacity
+                    style={styles.permissionButton}
+                    onPress={handlePermissionPress}
+                  >
+                    <Text style={styles.permissionButtonText}>
+                      {permission.canAskAgain
+                        ? "Allow Camera"
+                        : "Open Settings"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
             <View style={styles.cornerTopLeft} />
             <View style={styles.cornerTopRight} />
             <View style={styles.cornerBottomLeft} />
             <View style={styles.cornerBottomRight} />
           </View>
+
+          <View style={styles.buttonGroup}>
+            <GradientButton
+              title="Upload from Files / Photos"
+              onPress={pickImage}
+            />
+
+            {scanned && (
+              <TouchableOpacity
+                style={styles.scanAgainButton}
+                onPress={resetScan}
+              >
+                <Text style={styles.scanAgainText}>
+                  Scan Again
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Dev builds only: lets us reach Login without a valid QR */}
+            {__DEV__ && (
+              <TouchableOpacity
+                style={styles.devSkip}
+                onPress={() => router.replace("/Login")}
+              >
+                <Text style={styles.devSkipText}>
+                  Skip QR (dev only)
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        <View style={styles.bottomContainer}>
-          {scanned && (
-            <TouchableOpacity
-              style={styles.scanAgainButton}
-              onPress={() => setScanned(false)}
-            >
-              <Text style={styles.scanAgainText}>
-                Scan Again
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          <GradientButton
-            title="Upload from Files / Photos"
-            onPress={pickImage}
-          />
-
-        </View>
+        <Text style={styles.footerText}>
+          Enterprise-grade · End-to-end encrypted
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -352,7 +428,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#090B14",
-    paddingHorizontal: 20,
+    // Figma button is 326 wide on a 390 frame
+    paddingHorizontal: 32,
   },
 
   header: {
@@ -365,7 +442,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Outfit_700Bold",
     lineHeight: 34,
-    fontWeight: "700",
   },
 
   subtitle: {
@@ -381,7 +457,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: -40,
+    // Figma: scanner + button group sits slightly below centre
+    paddingTop: 30,
+  },
+
+  buttonGroup: {
+    alignSelf: "stretch",
+    marginTop: 26,
   },
 
   qrContainer: {
@@ -409,6 +491,29 @@ const styles = StyleSheet.create({
 
   qrIcon: {
     opacity: 0.15,
+  },
+
+  permissionText: {
+    marginTop: 10,
+    color: "#7A8FAF",
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+  },
+
+  permissionButton: {
+    marginTop: 14,
+    paddingHorizontal: 18,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#6C4FF8",
+    justifyContent: "center",
+  },
+
+  permissionButtonText: {
+    color: "#FFF",
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
   },
 
   cornerTopLeft: {
@@ -459,17 +564,26 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 12,
   },
 
-  bottomContainer: {
-    marginBottom: 28,
-  },
-
   scanAgainButton: {
     height: 52,
     borderRadius: 14,
     backgroundColor: "#1C2230",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginTop: 12,
+  },
+
+  devSkip: {
+    alignSelf: "center",
+    marginTop: 14,
+    padding: 6,
+  },
+
+  devSkipText: {
+    color: "#7A8FAF",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    textDecorationLine: "underline",
   },
 
   scanAgainText: {
@@ -503,9 +617,11 @@ const styles = StyleSheet.create({
   },
 
   footerText: {
-    marginTop: 56,
-    color: "#667085",
+    marginBottom: 16,
+    color: "#7A8FAF",
     textAlign: "center",
-    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    lineHeight: 16,
   },
 });

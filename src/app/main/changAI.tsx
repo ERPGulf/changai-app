@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,37 +9,75 @@ import {
   KeyboardAvoidingView,
   Image,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { runText2SqlPipeline } from "../../services/changAiService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const MONO_FONT = Platform.select({ ios: "Menlo", default: "monospace" });
+
+const SUGGESTIONS = [
+  "Show procurement delays",
+  "Q2 cash flow summary",
+  "Top selling products this month",
+];
+
 interface Message {
   id: string;
   text: string;
   sender: "user" | "ai";
+  time: string;
+}
+
+function formatTime(date: Date) {
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const suffix = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${suffix}`;
+}
+
+function AiAvatar({ size }: { size: number }) {
+  return (
+    <View
+      style={[
+        styles.avatar,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
+    >
+      <Image
+        source={require("../../../assets/images/Icon.png")}
+        style={{ width: size * 0.55, height: size * 0.55 }}
+        resizeMode="contain"
+      />
+    </View>
+  );
 }
 
 export default function ChangAI() {
   const insets = useSafeAreaInsets();
 
+  const [welcomeTime] = useState(() => formatTime(new Date()));
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
+  const scrollRef = useRef<ScrollView>(null);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const sendQuestion = async (text: string) => {
+    const question = text.trim();
+    if (!question || loading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: question,
       sender: "user",
+      time: formatTime(new Date()),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
-    const question = input;
     setInput("");
 
     try {
@@ -56,6 +94,7 @@ export default function ChangAI() {
         id: `${Date.now()}-ai`,
         text: response.answer || "No response received",
         sender: "ai",
+        time: formatTime(new Date()),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -68,8 +107,12 @@ export default function ChangAI() {
 
       const errorMessage: Message = {
         id: `${Date.now()}-error`,
-        text: error?.message || "Something went wrong.",
+        text:
+          error?.response?.status === 401
+            ? "Your session has expired. Please log in again."
+            : error?.message || "Something went wrong.",
         sender: "ai",
+        time: formatTime(new Date()),
       };
 
       setMessages((prev) => [...prev, errorMessage]);
@@ -78,13 +121,19 @@ export default function ChangAI() {
     }
   };
 
+  const handleSend = () => sendQuestion(input);
+
+  const resetChat = () => {
+    setMessages([]);
+    setInput("");
+  };
 
   return (
-   <KeyboardAvoidingView
-  style={styles.container}
-  behavior={Platform.OS === "ios" ? "padding" : "height"}
-  keyboardVerticalOffset={0}
->
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
       <StatusBar style="light" />
 
       {/* Header */}
@@ -97,32 +146,26 @@ export default function ChangAI() {
         ]}
       >
         <View style={styles.headerLeft}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../../assets/images/Icon.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
+          <View>
+            <AiAvatar size={38} />
+            <View style={styles.onlineDot} />
           </View>
 
-          <View>
+          <View style={styles.headerText}>
             <Text style={styles.title}>changAI</Text>
-
-            <View style={styles.statusRow}>
-              <View style={styles.greenDot} />
-
-              <Text style={styles.subtitle}>
-                ERP AI · 4 modules connected
-              </Text>
-            </View>
+            <Text style={styles.subtitle}>
+              ERP AI · 4 modules connected
+            </Text>
           </View>
         </View>
 
-        {/* Refresh Button should be INSIDE the header */}
-        <TouchableOpacity style={styles.refreshButton}>
-          <Ionicons
-            name="refresh-outline"
-            size={18}
+        <TouchableOpacity
+          style={styles.refreshButton}
+          onPress={resetChat}
+        >
+          <Feather
+            name="refresh-cw"
+            size={14}
             color="#8A96B6"
           />
         </TouchableOpacity>
@@ -130,68 +173,84 @@ export default function ChangAI() {
 
       {/* Chat */}
       <ScrollView
+        ref={scrollRef}
+        onContentSizeChange={() =>
+          scrollRef.current?.scrollToEnd({ animated: true })
+        }
         style={styles.chatContainer}
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingBottom: 16,
-        }}
+        contentContainerStyle={styles.chatContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.aiRow}>
-          <View style={styles.smallLogo}>
-            <Image
-              source={require("../../../assets/images/Icon.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
+          <AiAvatar size={24} />
 
-          <View style={styles.aiBubble}>
-            <Text style={styles.aiText}>
-              Hello! I'm changAI, your ERP intelligence assistant. I have full access to your business data across Sales, Inventory, Finance, and HR. What would you like to explore today?
-            </Text>
+          <View style={styles.aiColumn}>
+            <View style={styles.aiBubble}>
+              <Text style={styles.aiText}>
+                Hello! I'm changAI, your ERP intelligence assistant. I have full access to your business data across Sales, Inventory, Finance, and HR. What would you like to explore today?
+              </Text>
+            </View>
+            <Text style={styles.time}>{welcomeTime}</Text>
           </View>
         </View>
 
-        <Text style={styles.timeLeft}>9:41 AM</Text>
-
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            style={
-              message.sender === "user"
-                ? styles.userRow
-                : styles.aiRow
-            }
-          >
-            {message.sender === "ai" && (
-              <View style={styles.smallLogo}>
-                <Image
-                  source={require("../../../assets/images/Icon.png")}
-                  style={styles.logoImage}
-                />
-              </View>
-            )}
-
-            <View
-              style={
-                message.sender === "user"
-                  ? styles.userBubble
-                  : styles.aiBubble
-              }
-            >
-              <Text
-                style={
-                  message.sender === "user"
-                    ? styles.userText
-                    : styles.aiText
-                }
+        {messages.map((message) =>
+          message.sender === "user" ? (
+            <View key={message.id} style={styles.userRow}>
+              <LinearGradient
+                colors={["#6C4FF8", "#5038E0"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.userBubble}
               >
-                {message.text}
+                <Text style={styles.userText}>{message.text}</Text>
+              </LinearGradient>
+              <Text style={[styles.time, styles.timeRight]}>
+                {message.time}
               </Text>
             </View>
+          ) : (
+            <View key={message.id} style={styles.aiRow}>
+              <AiAvatar size={24} />
+
+              <View style={styles.aiColumn}>
+                <View style={styles.aiBubble}>
+                  <Text style={styles.aiText}>{message.text}</Text>
+                </View>
+                <Text style={styles.time}>{message.time}</Text>
+              </View>
+            </View>
+          )
+        )}
+
+        {loading && (
+          <View style={styles.aiRow}>
+            <AiAvatar size={24} />
+            <View style={[styles.aiBubble, styles.typingBubble]}>
+              <ActivityIndicator size="small" color="#8B6FFF" />
+            </View>
           </View>
+        )}
+      </ScrollView>
+
+      {/* Suggestions */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        style={styles.suggestionScroll}
+        contentContainerStyle={styles.suggestionContent}
+      >
+        {SUGGESTIONS.map((item) => (
+          <TouchableOpacity
+            key={item}
+            style={styles.suggestionChip}
+            onPress={() => sendQuestion(item)}
+            disabled={loading}
+          >
+            <Text style={styles.suggestionText}>{item}</Text>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
@@ -203,32 +262,32 @@ export default function ChangAI() {
           placeholderTextColor="#6D7895"
           value={input}
           onChangeText={setInput}
+          onSubmitEditing={handleSend}
+          returnKeyType="send"
         />
 
         <TouchableOpacity style={styles.voiceButton}>
-          <Ionicons
-            name="mic-outline"
-            size={18}
-            color="#A0A9C0"
-          />
+          <Feather name="mic" size={13} color="#A0A9C0" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.sendButton}
           onPress={handleSend}
           disabled={loading}
+          style={loading && styles.sendDisabled}
         >
-          <Ionicons
-            name="paper-plane"
-            size={16}
-            color="#FFF"
-          />
+          <LinearGradient
+            colors={["#6C4FF8", "#5038E0"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.sendButton}
+          >
+            <Feather name="send" size={13} color="#FFF" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
-
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -236,13 +295,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#080C14",
   },
 
-  
   header: {
     paddingHorizontal: 16,
     paddingBottom: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.06)",
   },
 
   headerLeft: {
@@ -250,52 +311,54 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  logoContainer: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+  headerText: {
+    marginLeft: 12,
   },
 
-  logoImage: {
-    width: 32,
-    height: 32,
+  avatar: {
+    backgroundColor: "#1A1538",
+    borderWidth: 1,
+    borderColor: "rgba(108,79,248,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  onlineDot: {
+    position: "absolute",
+    right: -1,
+    bottom: -1,
+
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+
+    backgroundColor: "#00D4B4",
+    borderWidth: 2,
+    borderColor: "#080C14",
   },
 
   title: {
     color: "#FFF",
-    fontSize: 18,
-    fontFamily: "outfit-semibold",
-  },
-
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 2,
-  },
-
-  greenDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#00D084",
-    marginRight: 6,
+    fontSize: 16,
+    lineHeight: 20,
+    fontFamily: "Outfit_600SemiBold",
   },
 
   subtitle: {
+    marginTop: 2,
     color: "#7A8FAF",
-    fontSize: 12,
-    fontFamily: "outfit-regular",
+    fontSize: 10,
+    lineHeight: 14,
+    fontFamily: MONO_FONT,
   },
 
   refreshButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: "#151D2E",
     borderWidth: 1,
-    borderColor: "#222B41",
+    borderColor: "rgba(255,255,255,0.08)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -305,127 +368,153 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  messageInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-
-    borderRadius: 16,
-    borderWidth: 0.8,
-    borderColor: "rgba(255,255,255,0.07)",
-    backgroundColor: "#151D2E",
+  chatContent: {
+    flexGrow: 1,
+    paddingTop: 4,
+    paddingBottom: 16,
   },
 
   aiRow: {
     flexDirection: "row",
     alignItems: "flex-start",
+    gap: 10,
     marginTop: 16,
   },
 
-  smallLogo: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-    marginTop: 2,
+  aiColumn: {
+    flexShrink: 1,
+    maxWidth: "82%",
   },
 
   aiBubble: {
-    maxWidth: 268,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
 
-    backgroundColor: "#0F1521",
+    backgroundColor: "#121826",
 
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
 
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-    borderBottomLeftRadius: 16,
+    borderRadius: 16,
+    borderTopLeftRadius: 4,
   },
+
+  typingBubble: {
+    paddingHorizontal: 18,
+  },
+
   aiText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "400",
-    lineHeight: 23,
-    fontFamily: "outfit-regular",
-  },
-  timeLeft: {
-    color: "#69758F",
-    fontSize: 11,
-    marginLeft: 40,
-    marginTop: 8,
+    color: "#E2E8F0",
+    fontSize: 13,
+    lineHeight: 21,
+    fontFamily: "Inter_400Regular",
   },
 
-  footer: {
-    height: 52,
+  time: {
+    marginTop: 6,
+    color: "#5E6A85",
+    fontSize: 9,
+    fontFamily: MONO_FONT,
+  },
 
-    marginHorizontal: 16,
-
-    marginTop: 16,
-
-    marginBottom: 20,
-
-    borderRadius: 20,
-
-    paddingHorizontal: 16,
-
-    backgroundColor: "#151D2E",
-
-    flexDirection: "row",
-
-    alignItems: "center",
+  timeRight: {
+    alignSelf: "flex-end",
   },
 
   userRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
+    alignItems: "flex-end",
     marginTop: 16,
   },
 
   userBubble: {
-    maxWidth: 268,
-    backgroundColor: "#6C4FF8",
+    maxWidth: "78%",
     borderRadius: 16,
-    paddingHorizontal: 16,
+    borderTopRightRadius: 4,
+    paddingHorizontal: 14,
     paddingVertical: 12,
   },
 
   userText: {
     color: "#FFF",
-    fontSize: 15,
-    lineHeight: 24,
-    fontFamily: "outfit-regular",
+    fontSize: 13,
+    lineHeight: 21,
+    fontFamily: "Inter_400Regular",
+  },
+
+  suggestionScroll: {
+    flexGrow: 0,
+  },
+
+  suggestionContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+
+  suggestionChip: {
+    height: 34,
+    paddingHorizontal: 14,
+    justifyContent: "center",
+
+    borderRadius: 999,
+    backgroundColor: "#151D2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.07)",
+  },
+
+  suggestionText: {
+    color: "#C9D3E8",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+
+  footer: {
+    height: 50,
+
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 16,
+
+    borderRadius: 16,
+
+    paddingLeft: 16,
+    paddingRight: 8,
+
+    backgroundColor: "#151D2E",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.07)",
+
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 
   input: {
     flex: 1,
     color: "#FFF",
-    fontSize: 15,
-    fontFamily: "outfit-regular",
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    paddingVertical: 0,
   },
 
   voiceButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#1C2438",
     justifyContent: "center",
     alignItems: "center",
   },
 
   sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#6C4FF8",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 6,
+    boxShadow: "0 4px 12px 0 rgba(108, 79, 248, 0.45)",
+  },
+
+  sendDisabled: {
+    opacity: 0.5,
   },
 });

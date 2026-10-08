@@ -7,9 +7,10 @@ import {
     FlatList,
     Dimensions,
     Image,
+    Platform,
 } from "react-native";
 import GradientButton from "../components/common/GradientButton";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,7 +40,7 @@ const slides = [
     {
         id: "1",
         icon: "null",
-        iconColor: "#8B5CF6",
+        iconColor: "#6C4FF8",
         glow: "rgba(139,92,246,0.15)",
         title: "Meet changAI",
         description:
@@ -47,23 +48,37 @@ const slides = [
     },
     {
         id: "2",
-        icon: "server-outline",
+        icon: "database",
+        iconSet: Feather,
         iconColor: "#00D4B4",
         glow: "rgba(0,212,180,0.15)",
         title: "Connected to ERP",
         description:
-            "Real answers. Live data. Zero SQL.",
+            "Live sync with SAP, Oracle, and Microsoft Dynamics — ask questions about your data without writing a single query.",
     },
     {
         id: "3",
-        icon: "stats-chart",
+        icon: "bar-chart-2",
+        iconSet: Feather,
         iconColor: "#F59E0B",
         glow: "rgba(245,158,11,0.15)",
         title: "Instant Insights",
         description:
-            "Get real-time business insights instantly, helping you act quickly on sales trends or stock issues.",
+            "From revenue trends to inventory alerts, changAI surfaces what matters before you even think to ask.",
     },
 ];
+
+function SlideIcon({
+    IconSet,
+    name,
+    color,
+}: {
+    IconSet: typeof Ionicons | typeof Feather;
+    name: string;
+    color: string;
+}) {
+    return <IconSet name={name as any} size={32} color={color} />;
+}
 
 export default function Onboarding() {
     const flatListRef = useRef<FlatList>(null);
@@ -84,6 +99,8 @@ export default function Onboarding() {
                     index: currentIndex + 1,
                     animated: true,
                 });
+                // onMomentumScrollEnd doesn't fire for programmatic scrolls on iOS
+                setCurrentIndex(currentIndex + 1);
 
                 Animated.timing(fadeAnim, {
                     toValue: 1,
@@ -122,6 +139,11 @@ export default function Onboarding() {
                     pagingEnabled
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(item) => item.id}
+                    getItemLayout={(_, index) => ({
+                        length: width,
+                        offset: width * index,
+                        index,
+                    })}
                     onMomentumScrollEnd={(e) => {
                         const index = Math.round(
                             e.nativeEvent.contentOffset.x / width
@@ -178,12 +200,18 @@ export default function Onboarding() {
                                 />
 
                                 {/* Icon */}
+                                {/* Figma: linear-gradient(135deg, color 20% → 7%), border 0.8px color 25% */}
                                 <LinearGradient
                                     colors={[
-                                        `${item.iconColor}26`,
+                                        `${item.iconColor}33`,
                                         `${item.iconColor}12`,
                                     ]}
-                                    style={styles.iconContainer}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={[
+                                        styles.iconContainer,
+                                        { borderColor: `${item.iconColor}40` },
+                                    ]}
                                 >
                                     {item.id === "1" ? (
                                         <Image
@@ -191,9 +219,9 @@ export default function Onboarding() {
                                             style={styles.robotIcon}
                                         />
                                     ) : (
-                                        <Ionicons
-                                            name={item.icon as any}
-                                            size={36}
+                                        <SlideIcon
+                                            IconSet={item.iconSet ?? Ionicons}
+                                            name={item.icon}
                                             color={item.iconColor}
                                         />
                                     )}
@@ -238,9 +266,10 @@ export default function Onboarding() {
                     <GradientButton
                         title={
                             currentIndex === slides.length - 1
-                                ? "Get Started →"
-                                : "Continue →"
+                                ? "Get Started"
+                                : "Continue"
                         }
+                        rightIcon="arrow-right"
                         onPress={handleNext}
                         style={styles.button}
                     />
@@ -279,7 +308,7 @@ const styles = StyleSheet.create({
     skipText: {
         color: "#83A9E3",
         textAlign: "center",
-        fontFamily: "Consolas",
+        fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }),
         fontSize: 12,
         fontWeight: "400",
         lineHeight: 16,
@@ -291,7 +320,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         justifyContent: "center",
         alignItems: "center",
-
+        // Lifts the content so the icon box centre sits at y≈318 of the 844 Figma frame
+        paddingBottom: 146,
     },
 
     ringLarge: {
@@ -326,15 +356,14 @@ const styles = StyleSheet.create({
         borderWidth: 0.6,
     },
     iconContainer: {
-        width: 84,
-        height: 84,
-        borderRadius: 26,
+        width: 80,
+        height: 80,
+        borderRadius: 24,
 
         justifyContent: "center",
         alignItems: "center",
 
-        borderWidth: 1,
-        borderColor: "rgba(255,255,255,0.10)",
+        borderWidth: 0.8,
     },
     glowOuter: {
         width: 220,
@@ -342,6 +371,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         position: "relative",
+        // The glow extends past the box; pull the title up so the box→title gap matches Figma
+        marginBottom: -42,
     },
     // glowCircle1: {
     //     position: "absolute",
@@ -367,8 +398,8 @@ const styles = StyleSheet.create({
     //     opacity: 0.08,
     // },
     robotIcon: {
-        width: 42,
-        height: 42,
+        width: 32,
+        height: 32,
     },
 
     title: {
@@ -377,7 +408,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: 30,
         fontFamily: "Outfit_700Bold",
-        fontWeight: "700",
         lineHeight: 36,
 
 
@@ -399,7 +429,6 @@ const styles = StyleSheet.create({
 
         fontFamily: "Inter_400Regular",
         fontSize: 14,
-        fontWeight: "400",
         lineHeight: 23,
     },
 

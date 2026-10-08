@@ -5,13 +5,12 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
 const questions = [
-  "Show today's sales performance",
-  "What's the current inventory status?",
-  "Generate monthly financial summary",
+  "Show inventory below reorder point",
+  "Compare payroll vs last quarter",
+  "Which suppliers have delayed orders?",
 ];
 
 export default function RecentQuestions() {
@@ -21,32 +20,28 @@ export default function RecentQuestions() {
         Recent Questions
       </Text>
 
-      {questions.map((item, index) => (
+      {questions.map((item) => (
         <TouchableOpacity
-          key={index}
+          key={item}
           style={styles.card}
           activeOpacity={0.8}
         >
-          <View style={styles.leftSection}>
-            <View style={styles.iconContainer}>
-              <Ionicons
-                name="time-outline"
-                size={13}
-                color="#7A8FAF"
-              />
-            </View>
-
-            <Text
-              style={styles.question}
-              numberOfLines={2}
-            >
-              {item}
-            </Text>
-          </View>
-
-          <MaterialCommunityIcons
-            name="arrow-top-right"
+          <Feather
+            name="clock"
             size={13}
+            color="#7A8FAF"
+          />
+
+          <Text
+            style={styles.question}
+            numberOfLines={1}
+          >
+            {item}
+          </Text>
+
+          <Feather
+            name="arrow-up-right"
+            size={12}
             color="#7A8FAF"
           />
         </TouchableOpacity>
@@ -57,68 +52,38 @@ export default function RecentQuestions() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 28,
+    marginTop: 36,
   },
 
   heading: {
     color: "#FFFFFF",
-    fontSize: 20,
-    lineHeight: 28,
-    fontFamily: "outfit-bold",
-    marginBottom: 16,
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: "Outfit_600SemiBold",
+    marginBottom: 12,
   },
 
   card: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 12,
 
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    height: 46,
 
-    minHeight: 59,
-
-    borderRadius: 20,
+    borderRadius: 14,
     backgroundColor: "#151D2E",
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
 
     marginBottom: 10,
   },
 
-  leftSection: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-
-    marginRight: 12, // Figma gap between text and arrow
-  },
-
-  iconContainer: {
-    width: 18,
-    height: 18,
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    marginRight: 12,
-  },
-
   question: {
     flex: 1,
-
     color: "#C9D3E8",
-
-    fontSize: 14,
-    lineHeight: 20,
-
-    fontFamily: "outfit-regular",
-  },
-  arrow: {
-    marginLeft: 12, 
-    height: 13,
-    width: 13,
-    justifyContent: "center",
-    alignItems: "center",
+    fontSize: 13,
+    lineHeight: 18,
+    fontFamily: "Inter_400Regular",
   },
 });

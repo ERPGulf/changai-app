@@ -38,10 +38,12 @@ export const generateToken = async (password: string) => {
       token.access_token
     );
 
-    await AsyncStorage.setItem(
-      "changai_refresh_token",
-      token.refresh_token
-    );
+    if (token.refresh_token) {
+      await AsyncStorage.setItem(
+        "changai_refresh_token",
+        token.refresh_token
+      );
+    }
 
     return token;
   } catch (error: any) {
@@ -50,8 +52,14 @@ export const generateToken = async (password: string) => {
       error.response?.data || error.message
     );
 
-    throw new Error(
-      error.response?.data?.message || "Invalid password."
-    );
+    // Only HTTP errors mean the credentials were rejected; keep the
+    // original message for missing QR data, network failures, etc.
+    if (error.response) {
+      throw new Error(
+        error.response.data?.message || "Invalid password."
+      );
+    }
+
+    throw new Error(error.message || "Something went wrong.");
   }
 };

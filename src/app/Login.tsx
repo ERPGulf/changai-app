@@ -1,20 +1,84 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GradientButton from "../components/common/GradientButton";
 import { router } from "expo-router";
 import { generateToken } from "../services/authService";
+
+const MONO_FONT = Platform.select({ ios: "Menlo", default: "monospace" });
+
+// Pixel-grid header from the Figma frame
+const CELL = 12;
+const GAP = 6;
+const GRID_ROWS = 7;
+
+// Deterministic pseudo-random so the pattern doesn't change between renders
+function noise(i: number) {
+  const x = Math.sin(i * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+}
+
+function PixelGrid() {
+  const { width } = useWindowDimensions();
+  const cols = Math.ceil(width / (CELL + GAP));
+
+  const cells = useMemo(() => {
+    const out: { key: string; left: number; top: number; opacity: number }[] = [];
+    for (let r = 0; r < GRID_ROWS; r++) {
+      // fade out towards the bottom of the header
+      const rowFade = 1 - r / GRID_ROWS;
+      for (let c = 0; c < cols; c++) {
+        const n = noise(r * cols + c + 1);
+        if (n < 0.45) continue;
+        out.push({
+          key: `${r}-${c}`,
+          left: c * (CELL + GAP),
+          top: r * (CELL + GAP),
+          opacity: n * 0.2 * rowFade,
+        });
+      }
+    }
+    return out;
+  }, [cols]);
+
+  return (
+    <View style={styles.gridWrap} pointerEvents="none">
+      <LinearGradient
+        colors={["#1A1240", "rgba(9,11,20,0)"]}
+        style={StyleSheet.absoluteFill}
+      />
+      {cells.map((cell) => (
+        <View
+          key={cell.key}
+          style={[
+            styles.cell,
+            { left: cell.left, top: cell.top, opacity: cell.opacity },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
 
 export default function Login() {
   const [password, setPassword] = useState("");
@@ -24,6 +88,7 @@ export default function Login() {
     company: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     loadEmployee();
   }, []);
@@ -50,105 +115,92 @@ export default function Login() {
       return;
     }
 
+    setLoading(true);
     try {
       await generateToken(password);
       router.replace("/main/Home");
     } catch (error: any) {
       Alert.alert("Login Failed", error.message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const firstName = employee.fullName.split(" ")[0] || "User";
+
+  const initials = employee.fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+  const subtitle = [employee.employeeCode, employee.company]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Decorative Background */}
-      <LinearGradient
-        colors={["#181235", "#090B14"]}
-        style={styles.topBackground}
-      />
+      <PixelGrid />
 
       {/* QR Verified Badge */}
       <View style={styles.badge}>
-        <Ionicons
-          name="checkmark-circle"
-          size={12}
-          color="#00D4B4"
-        />
-
-        <Text style={styles.badgeText}>
-          QR Verified
-        </Text>
+        <Ionicons name="checkmark" size={11} color="#00D4B4" />
+        <Text style={styles.badgeText}>QR Verified</Text>
       </View>
 
       {/* Greeting */}
       <View style={styles.header}>
-        <Text style={styles.loginLabel}>
-          LOGIN
-        </Text>
+        <Text style={styles.loginLabel}>LOGIN</Text>
 
         <Text style={styles.title}>
-          Good Morning,
-          {employee.fullName
-            ? ` ${employee.fullName.split(" ")[0]}!`
-            : " User!"}
+          {getGreeting()}, {firstName}!
         </Text>
       </View>
 
       {/* Employee Card */}
       <View style={styles.employeeCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {employee.fullName
-              .split(" ")
-              .map((word) => word[0])
-              .join("")
-              .substring(0, 2)
-              .toUpperCase()}
-          </Text>
-        </View>
-
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-          }}
+        <LinearGradient
+          colors={["#4B6BFF", "#6C4FF8"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.avatar}
         >
-          <Text style={styles.name}>
+          <Text style={styles.avatarText}>{initials}</Text>
+        </LinearGradient>
+
+        <View style={styles.employeeInfo}>
+          <Text style={styles.name} numberOfLines={1}>
             {employee.fullName}
           </Text>
-          <Text style={styles.role}>
-            {employee.employeeCode} • {employee.company}
-          </Text>
+          {!!subtitle && (
+            <Text style={styles.role} numberOfLines={1}>
+              {subtitle}
+            </Text>
+          )}
         </View>
 
         <View style={styles.liveBadge}>
-          <Text style={styles.liveText}>
-            SAP Live
-          </Text>
+          <View style={styles.liveDot} />
+          <Text style={styles.liveText}>SAP Live</Text>
         </View>
       </View>
 
       {/* Password */}
       <View style={styles.passwordSection}>
         <View style={styles.passwordHeader}>
-          <Text style={styles.passwordLabel}>
-            PASSWORD
-          </Text>
+          <Text style={styles.passwordLabel}>PASSWORD</Text>
 
-          <TouchableOpacity>
-            <Text style={styles.forgot}>
-              Forgot?
-            </Text>
+          <TouchableOpacity hitSlop={8}>
+            <Text style={styles.forgot}>Forgot?</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.inputContainer}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={15}
-            color="#7A8FAF"
-          />
+          <Feather name="lock" size={14} color="#7A8FAF" />
 
           <TextInput
             placeholder="Enter your password"
@@ -156,19 +208,18 @@ export default function Login() {
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
+            onSubmitEditing={handleLogin}
+            returnKeyType="go"
             style={styles.input}
           />
 
           <TouchableOpacity
+            hitSlop={8}
             onPress={() => setShowPassword(!showPassword)}
           >
-            <Ionicons
-              name={
-                showPassword
-                  ? "eye-off-outline"
-                  : "eye-outline"
-              }
-              size={15}
+            <Feather
+              name={showPassword ? "eye-off" : "eye"}
+              size={14}
               color="#7A8FAF"
             />
           </TouchableOpacity>
@@ -179,22 +230,31 @@ export default function Login() {
 
       {/* Login Button */}
       <GradientButton
-        title="Login →"
+        title={loading ? "Logging in..." : "Login"}
+        rightIcon={loading ? undefined : "arrow-right"}
         onPress={handleLogin}
+        disabled={loading}
       />
 
       {/* Rescan */}
-      <TouchableOpacity style={styles.rescanButton}>
-        <Ionicons
-          name="refresh-outline"
-          size={14}
-          color="#FFFFFF"
-        />
+      <TouchableOpacity
+        style={styles.rescanButton}
+        onPress={() => router.replace("/QrScan")}
+      >
+        <Feather name="refresh-cw" size={14} color="#FFFFFF" />
 
-        <Text style={styles.rescanText}>
-          Rescan QR
-        </Text>
+        <Text style={styles.rescanText}>Rescan QR</Text>
       </TouchableOpacity>
+
+      {/* Dev builds only: lets us reach Home without a working login */}
+      {__DEV__ && (
+        <TouchableOpacity
+          style={styles.devSkip}
+          onPress={() => router.replace("/main/Home")}
+        >
+          <Text style={styles.devSkipText}>Skip login (dev only)</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }
@@ -205,53 +265,63 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  topBackground: {
+  gridWrap: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 160,
+    height: GRID_ROWS * (CELL + GAP) + 40,
+    overflow: "hidden",
+  },
+
+  cell: {
+    position: "absolute",
+    width: CELL,
+    height: CELL,
+    borderRadius: 2,
+    backgroundColor: "#7A64FF",
   },
 
   badge: {
     alignSelf: "flex-end",
-    marginTop: 8,
+    marginTop: 12,
 
     flexDirection: "row",
     alignItems: "center",
+    gap: 5,
 
-    backgroundColor: "#163A38",
+    backgroundColor: "rgba(0,212,180,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,180,0.25)",
 
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
 
-    borderRadius: 20,
+    borderRadius: 999,
   },
 
   badgeText: {
-    marginLeft: 6,
     color: "#00D4B4",
     fontSize: 10,
-    fontWeight: "400",
+    fontFamily: MONO_FONT,
   },
 
   header: {
-    marginTop: 50,
+    marginTop: 64,
   },
 
   loginLabel: {
     color: "#7A8FAF",
-    fontSize: 12,
-    fontWeight: "400",
-    letterSpacing: 2,
+    fontSize: 10,
+    fontFamily: MONO_FONT,
+    letterSpacing: 1.5,
   },
 
   title: {
     marginTop: 6,
     color: "#FFF",
     fontSize: 24,
-    fontWeight: "700",
-    fontFamily: "outfit-bold",
+    fontFamily: "Outfit_700Bold",
     lineHeight: 32,
   },
 
@@ -263,20 +333,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F1521",
     borderRadius: 16,
 
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
 
     paddingVertical: 14,
-    paddingHorizontal: 16,
-
-    minHeight: 72,
+    paddingHorizontal: 14,
   },
+
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-
-    backgroundColor: "#4B6BFF",
 
     justifyContent: "center",
     alignItems: "center",
@@ -286,42 +353,59 @@ const styles = StyleSheet.create({
 
   avatarText: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontFamily: "outfit-bold",
+    fontSize: 15,
+    fontFamily: "Outfit_600SemiBold",
+  },
+
+  employeeInfo: {
+    flex: 1,
+    justifyContent: "center",
   },
 
   name: {
     color: "#FFFFFF",
-    fontSize: 16,
-    fontFamily: "outfit-semibold",
-    lineHeight: 22,
+    fontSize: 15,
+    fontFamily: "Outfit_600SemiBold",
+    lineHeight: 20,
   },
+
   role: {
-    marginTop: 2,
+    marginTop: 3,
     color: "#7A8FAF",
-    fontSize: 12,
-    lineHeight: 18,
-    fontFamily: "outfit-regular",
+    fontSize: 11,
+    lineHeight: 15,
+    fontFamily: MONO_FONT,
   },
+
   liveBadge: {
-    marginLeft: 12,
+    marginLeft: 10,
 
-    backgroundColor: "#113B38",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
 
+    backgroundColor: "rgba(0,212,180,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,180,0.25)",
     borderRadius: 999,
 
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
 
-    justifyContent: "center",
-    alignItems: "center",
+  liveDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#00D4B4",
   },
 
   liveText: {
     color: "#00D4B4",
-    fontSize: 11,
-    fontFamily: "outfit-medium",
+    fontSize: 10,
+    fontFamily: MONO_FONT,
   },
+
   passwordSection: {
     marginTop: 24,
   },
@@ -329,17 +413,20 @@ const styles = StyleSheet.create({
   passwordHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
 
   passwordLabel: {
     color: "#7A8FAF",
-    fontSize: 11,
-    letterSpacing: 2,
+    fontSize: 10,
+    fontFamily: MONO_FONT,
+    letterSpacing: 1.5,
   },
 
   forgot: {
-    color: "#6C4FF8",
+    color: "#8B6FFF",
     fontSize: 12,
+    fontFamily: "Inter_400Regular",
   },
 
   inputContainer: {
@@ -348,53 +435,65 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
 
-    minHeight: 48,
-
-    paddingVertical: 14,
+    height: 50,
     paddingHorizontal: 16,
 
-    borderRadius: 16,
+    borderRadius: 14,
 
-    backgroundColor: "#151D2E",
+    backgroundColor: "#121A29",
 
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.07)",
   },
 
   input: {
     flex: 1,
-    marginHorizontal: 12,
+    marginHorizontal: 10,
 
     color: "#FFFFFF",
 
     fontSize: 14,
-    fontFamily: "outfit-regular",
+    fontFamily: "Inter_400Regular",
 
     paddingVertical: 0,
   },
 
   rescanButton: {
-    marginTop: 16,
+    marginTop: 14,
     marginBottom: 24,
 
-    height: 56,
+    height: 52,
 
     borderRadius: 16,
 
-    backgroundColor: "#171D2E",
+    backgroundColor: "#121826",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
 
     flexDirection: "row",
+    gap: 8,
 
     justifyContent: "center",
     alignItems: "center",
   },
 
+  devSkip: {
+    alignSelf: "center",
+    marginTop: -12,
+    marginBottom: 12,
+    padding: 6,
+  },
+
+  devSkipText: {
+    color: "#7A8FAF",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    textDecorationLine: "underline",
+  },
+
   rescanText: {
     color: "#FFF",
-    marginLeft: 8,
-    fontWeight: "600",
     fontSize: 14,
-    fontFamily: "outfit-semibold",
-
+    fontFamily: "Outfit_500Medium",
   },
 });

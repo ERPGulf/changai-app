@@ -5,13 +5,39 @@ import {
   StyleSheet,
   Image,
   Animated,
+  Platform,
+  Dimensions,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import IconGlow from "../components/common/IconGlow";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import BackgroundGlow from "../components/common/BackgroundGlow";
 import Background from "../components/common/Background";
+
+// Figma frame size. All positions below are in Figma (390 x 844) coordinates
+// and are scaled to the device screen.
+const FRAME_WIDTH = 390;
+const FRAME_HEIGHT = 844;
+
+const LOGO_SIZE = 96;
+const LOGO_TOP = 306;
+const TITLE_TOP = 426;
+const SUBTITLE_TOP = 474;
+const DOTS_CENTER_Y = 533;
+const RINGS_CENTER_Y = 416;
+const RING_SIZES = [350, 240, 160];
+const FOOTER_TOP = 707;
+
+const PURPLE_GLOW = { cx: 41, cy: 258, size: 260, opacity: 0.35 };
+const TEAL_GLOW = { cx: 105, cy: 322, size: 180, opacity: 0.22 };
+
+const MONO_FONT = Platform.select({ ios: "Menlo", default: "monospace" });
+
 export default function Splash() {
+  // Figma frame is the full screen (incl. status/nav bars), so scale against the screen, not the window
+  const { width, height } = Dimensions.get("screen");
+  const sx = width / FRAME_WIDTH;
+  const sy = height / FRAME_HEIGHT;
+
   const iconOpacity = React.useRef(new Animated.Value(0)).current;
   const iconScale = React.useRef(new Animated.Value(0.85)).current;
 
@@ -47,90 +73,102 @@ export default function Splash() {
       });
     });
 
-    // const checkAppState = async () => {
-    //   try {
-    //     const onboardingCompleted = await AsyncStorage.getItem(
-    //       "onboardingCompleted"
-    //     );
+    const timer = setTimeout(() => {
+      router.replace("/Onboarding");
+    }, 5000); // 5 seconds
 
-    //     setTimeout(() => {
-    //       if (onboardingCompleted === "true") {
-    //         router.replace("/Welcome");
-    //       } else {
-    //         router.replace("/Onboarding");
-    //       }
-    //     }, 2500);
-    //     router.replace("/Onboarding");
-    //   } catch (error) {
-    //     console.log(error);
-
-    //     setTimeout(() => {
-    //       router.replace("/Onboarding");
-    //     }, 2500);
-    //   }
-    // };
-    const checkAppState = async () => {
-      setTimeout(() => {
-        router.replace("/Onboarding");
-      }, 5000); // 5 seconds
-    };
-
-    checkAppState();
+    return () => clearTimeout(timer);
   }, []);
+
+  const glow = (g: typeof PURPLE_GLOW, color: string) => (
+    <BackgroundGlow
+      color={color}
+      size={g.size * sx}
+      left={(g.cx - g.size / 2) * sx}
+      top={g.cy * sy - (g.size * sx) / 2}
+      opacity={g.opacity}
+    />
+  );
 
   return (
     <Background>
-      <View style={styles.centerContainer}>
+      {/* Ambient glows (top-left) */}
+      {glow(PURPLE_GLOW, "#6C4FF8")}
+      {glow(TEAL_GLOW, "#00D4B4")}
 
-        <Animated.View
-          style={{
+      {/* Concentric rings */}
+      {RING_SIZES.map((size) => (
+        <View
+          key={size}
+          pointerEvents="none"
+          style={[
+            styles.ring,
+            {
+              width: size,
+              height: size,
+              borderRadius: size / 2,
+              left: width / 2 - size / 2,
+              top: RINGS_CENTER_Y * sy - size / 2,
+            },
+          ]}
+        />
+      ))}
+
+      {/* Logo */}
+      <Animated.View
+        style={[
+          styles.logoWrapper,
+          {
+            top: LOGO_TOP * sy,
             opacity: iconOpacity,
             transform: [{ scale: iconScale }],
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <IconGlow
-            color="#6C4FF8"
-            size={380}
+          },
+        ]}
+      >
+        <IconGlow color="#6C4FF8" size={220} />
+
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/images/Icon.png")}
+            style={styles.logo}
           />
+        </View>
+      </Animated.View>
 
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../assets/images/Icon.png")}
-              style={styles.logo}
-            />
-          </View>
-        </Animated.View>
+      {/* Title */}
+      <Animated.View
+        style={[
+          styles.row,
+          { top: TITLE_TOP * sy, opacity: titleOpacity },
+        ]}
+      >
+        <Text style={styles.title}>changAI</Text>
+      </Animated.View>
 
-        <Animated.View
-          style={{
-            opacity: titleOpacity,
-            marginTop: 36,
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.title}>
-            changAI
-          </Text>
-        </Animated.View>
+      {/* Subtitle + loading dots */}
+      <Animated.View
+        style={[
+          styles.row,
+          { top: SUBTITLE_TOP * sy, opacity: subtitleOpacity },
+        ]}
+      >
+        <Text style={styles.subtitle}>ERP INTELLIGENCE</Text>
+      </Animated.View>
 
-        <Animated.View
-          style={{
-            opacity: subtitleOpacity,
-            marginTop: 4,
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.subtitle}>
-            ERP INTELLIGENCE
-          </Text>
-        </Animated.View>
+      <Animated.View
+        style={[
+          styles.row,
+          styles.dots,
+          { top: DOTS_CENTER_Y * sy - 2, opacity: subtitleOpacity },
+        ]}
+      >
+        <View style={styles.dot} />
+        <View style={styles.dot} />
+        <View style={styles.dot} />
+      </Animated.View>
 
-      </View>
-
-
-      <View style={styles.footer}>
+      {/* Footer */}
+      <View style={[styles.row, { top: FOOTER_TOP * sy }]}>
         <Text style={styles.powered}>Powered by</Text>
         <Text style={styles.company}>ERPGulf</Text>
       </View>
@@ -139,51 +177,31 @@ export default function Splash() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#080C14",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-
-  centerContainer: {
+  row: {
     position: "absolute",
-    top: "42%",
     left: 0,
     right: 0,
     alignItems: "center",
-    justifyContent: "center",
-    transform: [
-      { translateY: -90 }, // Move the whole logo block upward
-    ],
   },
 
+  ring: {
+    position: "absolute",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+  },
 
-  // glowLarge: {
-  //   position: "absolute",
-  //   width: 320,
-  //   height: 320,
-  //   borderRadius: 160,
-  //   backgroundColor: "rgba(108,79,248,0.035)",
-  // },
-  // glowMedium: {
-  //   position: "absolute",
-  //   width: 250,
-  //   height: 250,
-  //   borderRadius: 125,
-  //   backgroundColor: "rgba(108,79,248,0.055)",
-  // },
-  // glowSmall: {
-  //   position: "absolute",
-  //   width: 180,
-  //   height: 180,
-  //   borderRadius: 90,
-  //   backgroundColor: "rgba(108,79,248,0.08)",
-  // },
+  logoWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: LOGO_SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   logoContainer: {
-    width: 96,
-    height: 96,
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
     borderRadius: 32,
 
     backgroundColor: "#090613",
@@ -212,13 +230,10 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    marginTop: 0,
-
     color: "#FFF",
 
     fontFamily: "Outfit_700Bold",
     fontSize: 36,
-    fontWeight: "700",
 
     lineHeight: 40,
     letterSpacing: -0.9,
@@ -227,27 +242,38 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    marginTop: 0,
-    fontSize: 9,
+    fontFamily: MONO_FONT,
+    fontSize: 10,
+    lineHeight: 12,
     letterSpacing: 2.4,
     color: "rgba(255,255,255,0.42)",
   },
 
-  footer: {
-    position: "absolute",
-    bottom: 90,
-    left: 0,
-    right: 0,
-    alignItems: "center",
+  dots: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 6,
   },
+
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+
   powered: {
+    fontFamily: MONO_FONT,
     fontSize: 9,
+    lineHeight: 12,
     color: "rgba(255,255,255,.25)",
   },
 
   company: {
-    marginTop: 2,
+    marginTop: 4,
+    fontFamily: "Outfit_600SemiBold",
     fontSize: 10,
+    lineHeight: 14,
     color: "rgba(255,255,255,.40)",
   },
 });

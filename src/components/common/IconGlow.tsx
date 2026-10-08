@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import Svg, { Defs, RadialGradient, Stop, Circle } from "react-native-svg";
 
 type Props = {
@@ -10,6 +10,9 @@ export default function IconGlow({
   color,
   size = 220,
 }: Props) {
+  // Unique per instance so multiple glows with different colors don't share one gradient
+  const gradientId = `glow-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+
   return (
     <Svg
       width={size}
@@ -20,7 +23,7 @@ export default function IconGlow({
     >
       <Defs>
         <RadialGradient
-          id="glow"
+          id={gradientId}
           cx="50%"
           cy="50%"
           r="50%"
@@ -55,7 +58,7 @@ export default function IconGlow({
         cx={size / 2}
         cy={size / 2}
         r={size / 2}
-        fill="url(#glow)"
+        fill={`url(#${gradientId})`}
       />
     </Svg>
   );
